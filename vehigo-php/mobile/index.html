@@ -1,0 +1,2016 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#38BDF8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>TripAny — Premium Vehicle Rental</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="assets/app.css" rel="stylesheet">
+<link href="assets/overrides.css" rel="stylesheet">
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBg36zNfvaFGbYsfz5FqN0yIKf5tEY3BBQ&libraries=places&callback=initMaps" async defer></script>
+<style>
+/* Quick overrides */
+.screen { display:none;position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;background:var(--bg);z-index:1; }
+.screen.active { display:flex;flex-direction:column;z-index:2;animation:screenIn 0.35s ease-out; }
+.screen.exit { animation:screenOut 0.25s ease-in forwards; }
+@keyframes screenIn { from { opacity:0;transform:translateX(30px); } to { opacity:1;transform:translateX(0); } }
+@keyframes screenOut { from { opacity:1;transform:translateX(0); } to { opacity:0;transform:translateX(-30px); } }
+#splash-screen { display:none; }
+@keyframes fadeOut { to { opacity:0;pointer-events:none; } }
+.pulse { animation:pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+.gradient-text { background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+.bottom-nav { position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:100;background:rgba(30,58,76,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.06);display:none;padding:0.5rem 0 env(safe-area-inset-bottom,0.5rem); }
+[data-theme="light"] .bottom-nav { background:rgba(255,255,255,0.85);border-top:1px solid rgba(56,189,248,0.12); }
+.nav-item { flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:0.375rem 0;cursor:pointer;transition:all 0.2s;border:none;background:none;color:var(--text-muted);font-family:inherit; }
+.nav-item i { font-size:1.35rem;transition:all 0.3s; }
+.nav-item span { font-size:0.625rem;font-weight:600;transition:all 0.3s; }
+.nav-item.active { color:var(--primary); }
+.nav-item.active i { transform:scale(1.1); }
+.nav-item.active span { color:var(--primary); }
+.nav-item.active::after { content:'';width:4px;height:4px;border-radius:50%;background:var(--primary);margin-top:1px; }
+.wrapper { max-width:480px;width:100%;margin:0 auto;position:relative;min-height:100vh;overflow:hidden;background:var(--bg); }
+body { background:var(--bg-body);display:flex;justify-content:center; }
+</style>
+</head>
+<body>
+<div class="wrapper" id="app">
+
+<!-- SPLASH -->
+<div class="screen active" id="splash-screen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,#0F172A 0%,#1E293B 100%);z-index:999;">
+  <div style="text-align:center;padding:2rem;">
+    <div style="width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,#38BDF8,#7DD3FC);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;box-shadow:0 0 40px rgba(56,189,248,0.3);animation:pulse 2s ease-in-out infinite;">
+      <span style="color:white;font-size:2.25rem;font-weight:900;">T</span>
+    </div>
+    <h1 style="font-size:1.75rem;font-weight:900;letter-spacing:-0.02em;color:white;margin:0;">TripAny</h1>
+    <p style="color:rgba(255,255,255,0.5);font-size:0.8125rem;margin:0.375rem 0 2rem;">Premium Vehicle Rental</p>
+    <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1.5rem;">
+      <div style="display:flex;align-items:center;gap:0.375rem;background:rgba(255,255,255,0.08);padding:0.375rem 0.75rem;border-radius:20px;"><i class="bi bi-shield-check" style="color:#38BDF8;font-size:0.75rem;"></i><span style="color:rgba(255,255,255,0.7);font-size:0.625rem;font-weight:600;">Safe</span></div>
+      <div style="display:flex;align-items:center;gap:0.375rem;background:rgba(255,255,255,0.08);padding:0.375rem 0.75rem;border-radius:20px;"><i class="bi bi-lightning-charge-fill" style="color:#FBBF24;font-size:0.75rem;"></i><span style="color:rgba(255,255,255,0.7);font-size:0.625rem;font-weight:600;">Fast</span></div>
+      <div style="display:flex;align-items:center;gap:0.375rem;background:rgba(255,255,255,0.08);padding:0.375rem 0.75rem;border-radius:20px;"><i class="bi bi-currency-rupee" style="color:#34D399;font-size:0.75rem;"></i><span style="color:rgba(255,255,255,0.7);font-size:0.625rem;font-weight:600;">Affordable</span></div>
+    </div>
+    <div style="width:120px;height:3px;background:rgba(255,255,255,0.08);border-radius:4px;margin:0 auto;overflow:hidden;">
+      <div id="splash-progress" style="height:100%;width:0%;background:linear-gradient(90deg,#38BDF8,#7DD3FC);border-radius:4px;transition:width 2s ease;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="screen" id="login-screen">
+  <div style="flex:1;display:flex;flex-direction:column;padding:0 1.5rem 2rem;">
+    <div style="padding:1.5rem 0 0;">
+      <div style="width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,#38BDF8,#7DD3FC);display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(56,189,248,0.25);">
+        <span style="color:white;font-size:1.75rem;font-weight:900;">T</span>
+      </div>
+    </div>
+    <h2 style="font-size:1.75rem;font-weight:800;letter-spacing:-0.02em;color:var(--text);margin:1rem 0 0.25rem;">Welcome Back</h2>
+    <p style="color:var(--text-muted);font-size:0.9375rem;margin:0 0 2rem;">Sign in to continue your journey</p>
+    <div class="form-group">
+      <label class="form-label">Phone Number</label>
+      <div class="phone-input-wrapper" style="display:flex;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:0.125rem 0.125rem 0.125rem 0.75rem;transition:all 0.2s;">
+        <span style="font-size:1.2rem;margin-right:0.375rem;">🇮🇳</span>
+        <span style="font-weight:600;color:var(--text);margin-right:0.375rem;">+91</span>
+        <span style="color:var(--text-muted);">|</span>
+        <input type="tel" id="phone-input" class="form-input" placeholder="Enter phone number" maxlength="10" pattern="[0-9]{10}" style="border:none;background:transparent;padding:0.75rem 0.5rem;flex:1;outline:none;color:var(--text);font-size:1rem;">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-lg btn-block" onclick="requestOTP()" style="border-radius:16px;margin-top:0.5rem;">Send OTP</button>
+    <button class="btn btn-block" onclick="quickLogin()" style="border-radius:16px;margin-top:0.5rem;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);padding:0.8125rem;font-size:0.8125rem;font-weight:600;"><i class="bi bi-key-fill" style="margin-right:0.375rem;"></i> Test Login (John Doe)</button>
+    <div class="divider" style="margin:1.5rem 0;"><span>or continue with</span></div>
+    <button class="btn btn-block" style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:0.8125rem;display:flex;align-items:center;justify-content:center;gap:0.625rem;color:var(--text);margin-bottom:0.75rem;"><svg viewBox="0 0 48 48" style="width:20px;height:20px;"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>Continue with Google</button>
+    <button class="btn btn-block" style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:0.8125rem;display:flex;align-items:center;justify-content:center;gap:0.625rem;color:var(--text);"><i class="bi bi-envelope-fill" style="color:#38BDF8;"></i> Continue with Email</button>
+    <p style="font-size:0.6875rem;color:var(--text-muted);text-align:center;margin-top:1.5rem;">By continuing, you agree to our <a style="color:var(--primary);text-decoration:none;">Terms</a> & <a style="color:var(--primary);text-decoration:none;">Privacy Policy</a></p>
+  </div>
+</div>
+
+<!-- OTP -->
+<div class="screen" id="otp-screen">
+  <div style="padding:0.75rem 0.75rem 0;"><button class="btn btn-ghost" onclick="navigateTo('login-screen')" style="width:44px;height:44px;border-radius:14px;padding:0;display:flex;align-items:center;justify-content:center;"><i class="bi bi-arrow-left" style="font-size:1.25rem;"></i></button></div>
+  <div style="flex:1;display:flex;flex-direction:column;padding:0 1.5rem 2rem;text-align:center;">
+    <h2 style="font-size:1.75rem;font-weight:800;letter-spacing:-0.02em;color:var(--text);margin:0.5rem 0 0.25rem;">Verify OTP</h2>
+    <p style="color:var(--text-muted);font-size:0.9375rem;margin:0 0 2rem;">Code sent to <strong style="color:var(--text);">+91 <span id="otp-phone">9876543210</span></strong></p>
+    <div id="otp-container" style="display:flex;gap:0.625rem;justify-content:center;margin-bottom:2rem;">
+      <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autofocus style="width:50px;height:56px;text-align:center;font-size:1.5rem;font-weight:800;background:var(--bg-card);border:2px solid var(--border);border-radius:16px;color:var(--text);outline:none;transition:all 0.2s;">
+      <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:50px;height:56px;text-align:center;font-size:1.5rem;font-weight:800;background:var(--bg-card);border:2px solid var(--border);border-radius:16px;color:var(--text);outline:none;transition:all 0.2s;">
+      <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:50px;height:56px;text-align:center;font-size:1.5rem;font-weight:800;background:var(--bg-card);border:2px solid var(--border);border-radius:16px;color:var(--text);outline:none;transition:all 0.2s;">
+      <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:50px;height:56px;text-align:center;font-size:1.5rem;font-weight:800;background:var(--bg-card);border:2px solid var(--border);border-radius:16px;color:var(--text);outline:none;transition:all 0.2s;">
+      <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:50px;height:56px;text-align:center;font-size:1.5rem;font-weight:800;background:var(--bg-card);border:2px solid var(--border);border-radius:16px;color:var(--text);outline:none;transition:all 0.2s;">
+      <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:50px;height:56px;text-align:center;font-size:1.5rem;font-weight:800;background:var(--bg-card);border:2px solid var(--border);border-radius:16px;color:var(--text);outline:none;transition:all 0.2s;">
+    </div>
+    <button class="btn btn-primary btn-lg btn-block" onclick="verifyOTP()" style="border-radius:16px;">Verify & Continue</button>
+    <div id="otp-timer" style="margin-top:1.25rem;color:var(--text-muted);font-size:0.875rem;">Resend OTP in <span id="otp-countdown" style="font-weight:700;color:var(--text);">30s</span></div>
+    <button id="otp-resend" onclick="resendOTP()" style="display:none;margin-top:0.75rem;background:none;border:none;color:var(--primary);font-weight:700;font-size:0.875rem;cursor:pointer;">Resend OTP</button>
+    <div style="margin-top:0.5rem;"><a onclick="quickLogin()" style="color:var(--text-muted);font-size:0.75rem;text-decoration:none;cursor:pointer;"><i class="bi bi-arrow-right-circle"></i> Skip — use test account</a></div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="screen" id="home-screen" style="padding-bottom:72px;">
+  <div style="padding:0.75rem 1rem 0.375rem;display:flex;align-items:center;justify-content:space-between;">
+    <div><p style="color:var(--text-muted);font-size:0.6875rem;margin:0;font-weight:500;">Good Morning 👋</p><h1 style="font-size:1.125rem;font-weight:800;color:var(--text);margin:0;letter-spacing:-0.02em;">John Doe</h1></div>
+    <div style="display:flex;gap:0.375rem;">
+      <div class="nav-btn" style="width:36px;height:36px;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);cursor:pointer;position:relative;" onclick="navigateTo('notifications-screen')"><i class="bi bi-bell" style="font-size:0.875rem;"></i><span id="home-notif-dot" style="position:absolute;top:6px;right:6px;width:6px;height:6px;background:#EF4444;border-radius:50%;border:2px solid var(--bg);"></span><span id="home-notif-badge" style="display:none;position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:#EF4444;color:white;font-size:8px;font-weight:800;align-items:center;justify-content:center;border:2px solid var(--bg);">0</span></div>
+    </div>
+  </div>
+  
+  <div style="padding:0 1rem 0.5rem;">
+    <div class="search-box" style="display:flex;align-items:center;gap:0.375rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:0.5rem 0.75rem;cursor:pointer;" onclick="navigateTo('explore-screen')">
+      <i class="bi bi-search" style="color:var(--text-muted);font-size:0.875rem;"></i>
+      <span style="flex:1;color:var(--text-muted);font-size:0.8125rem;">Where are you going?</span>
+      <i class="bi bi-mic" style="color:var(--primary);font-size:0.875rem;"></i>
+    </div>
+  </div>
+
+  <!-- Location Selector -->
+  <div style="padding:0 1rem 0.5rem;">
+    <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;cursor:pointer;" onclick="showLocationPicker()">
+      <i class="bi bi-geo-alt-fill" style="font-size:0.875rem;color:var(--primary);"></i>
+      <div style="flex:1;"><div style="font-size:0.6875rem;color:var(--text-muted);">Current Location</div><div id="home-location-name" style="font-size:0.8125rem;font-weight:700;color:var(--text);">Kittur, 591115</div></div>
+      <i class="bi bi-chevron-down" style="color:var(--text-muted);font-size:0.75rem;"></i>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div style="padding:0 1rem 0.625rem;overflow-x:auto;white-space:nowrap;display:flex;gap:0.375rem;-webkit-overflow-scrolling:touch;">
+    <div class="filter-pill active" onclick="navigateTo('booking-screen')" style="font-size:0.75rem;padding:0.375rem 0.75rem;">🚗 Book Now</div>
+    <div class="filter-pill" style="font-size:0.75rem;padding:0.375rem 0.75rem;">✈️ Airport</div>
+    <div class="filter-pill" onclick="navigateTo('booking-screen')" style="font-size:0.75rem;padding:0.375rem 0.75rem;">🏙️ Outstation</div>
+    <div class="filter-pill" style="font-size:0.75rem;padding:0.375rem 0.75rem;">🚕 Local</div>
+    <div class="filter-pill" style="font-size:0.75rem;padding:0.375rem 0.75rem;">⏰ Hourly</div>
+    <div class="filter-pill" style="font-size:0.75rem;padding:0.375rem 0.75rem;">🔄 Round Trip</div>
+  </div>
+
+  <!-- Upcoming Booking -->
+  <div style="padding:0 1rem 0.625rem;">
+    <div class="section-header"><span style="font-weight:700;font-size:0.875rem;color:var(--text);">Upcoming Booking</span></div>
+    <div class="booking-card" style="display:flex;gap:0.75rem;padding:0.75rem;background:var(--card);border:1px solid var(--card-border);border-radius:14px;margin-top:0.5rem;box-shadow:0 3px 12px rgba(56,189,248,0.08);">
+      <div style="width:70px;height:52px;border-radius:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--border-light);"><img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=150&h=120&fit=crop" alt="Toyota Innova" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;align-items:start;"><span style="font-weight:700;color:var(--text);font-size:0.9375rem;">Toyota Innova</span><span class="badge badge-primary" style="font-size:0.625rem;">Tomorrow</span></div>
+        <p style="font-size:0.8125rem;color:var(--text-secondary);margin:0.125rem 0;">Delhi → Jaipur · 9:00 AM</p>
+        <div style="display:flex;gap:0.5rem;margin-top:0.25rem;"><span class="badge badge-success" style="font-size:0.625rem;"><i class="bi bi-check-circle-fill"></i> Confirmed</span><span class="price-dark" style="font-size:0.75rem;">₹4,500</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Banner -->
+  <div style="padding:0 1rem 0.625rem;position:relative;">
+    <div class="banner-slider" style="border-radius:14px;overflow:hidden;position:relative;background:linear-gradient(135deg,#38BDF8,#7DD3FC);min-height:100px;display:flex;align-items:center;padding:1rem;">
+      <div><h3 style="color:white;font-size:0.875rem;font-weight:800;margin:0 0 0.125rem;">Monsoon Special! 🌧️</h3><p style="color:rgba(255,255,255,0.85);font-size:0.6875rem;margin:0 0 0.5rem;">20% OFF on outstation trips</p><span style="background:rgba(255,255,255,0.2);padding:0.25rem 0.5rem;border-radius:6px;color:white;font-size:0.625rem;font-weight:600;">Use Code: MONSOON20</span></div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:0.375rem;margin-top:0.5rem;"><span style="width:6px;height:6px;border-radius:50%;background:var(--primary);"></span><span style="width:4px;height:4px;border-radius:50%;background:var(--text-muted);opacity:0.3;"></span><span style="width:4px;height:4px;border-radius:50%;background:var(--text-muted);opacity:0.3;"></span></div>
+  </div>
+
+  <!-- Categories -->
+  <div style="padding:0 1rem 0.625rem;">
+    <div class="section-header"><span style="font-weight:700;font-size:0.8125rem;color:var(--text);">Browse Categories</span><span style="font-size:0.6875rem;color:var(--primary);font-weight:600;cursor:pointer;" onclick="App.selectedCategory=null;navigateTo('explore-screen');">See All →</span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.625rem;margin-top:0.5rem;">
+      <div class="cat-item" style="text-align:center;cursor:pointer;" onclick="selectCategory('SUV')"><div style="width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;border:2px solid var(--border);box-shadow:0 3px 10px rgba(56,189,248,0.12);margin-bottom:0.375rem;"><img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=200&h=200&fit=crop" alt="SUV" style="width:100%;height:100%;object-fit:cover;"></div><span style="font-size:0.625rem;font-weight:700;color:var(--text);">SUV</span></div>
+      <div class="cat-item" style="text-align:center;cursor:pointer;" onclick="selectCategory('Sedan')"><div style="width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;border:2px solid var(--border);box-shadow:0 3px 10px rgba(56,189,248,0.12);margin-bottom:0.375rem;"><img src="https://images.unsplash.com/photo-1546614042-7df3c24c9e5d?w=200&h=200&fit=crop" alt="Sedan" style="width:100%;height:100%;object-fit:cover;"></div><span style="font-size:0.625rem;font-weight:700;color:var(--text);">Sedan</span></div>
+      <div class="cat-item" style="text-align:center;cursor:pointer;" onclick="selectCategory('Hatchback')"><div style="width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;border:2px solid var(--border);box-shadow:0 3px 10px rgba(56,189,248,0.12);margin-bottom:0.375rem;"><img src="https://images.unsplash.com/photo-1553029984-4886cad9b01f?w=200&h=200&fit=crop" alt="Hatchback" style="width:100%;height:100%;object-fit:cover;"></div><span style="font-size:0.625rem;font-weight:700;color:var(--text);">Hatchback</span></div>
+      <div class="cat-item" style="text-align:center;cursor:pointer;" onclick="selectCategory('Luxury')"><div style="width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;border:2px solid var(--border);box-shadow:0 3px 10px rgba(56,189,248,0.12);margin-bottom:0.375rem;"><img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=200&h=200&fit=crop" alt="Luxury" style="width:100%;height:100%;object-fit:cover;"></div><span style="font-size:0.625rem;font-weight:700;color:var(--text);">Luxury</span></div>
+      <div class="cat-item" style="text-align:center;cursor:pointer;" onclick="selectCategory('Tempo')"><div style="width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;border:2px solid var(--border);box-shadow:0 3px 10px rgba(56,189,248,0.12);margin-bottom:0.375rem;"><img src="https://images.unsplash.com/photo-1742077182275-e2510de2e926?w=200&h=200&fit=crop" alt="Tempo" style="width:100%;height:100%;object-fit:cover;"></div><span style="font-size:0.625rem;font-weight:700;color:var(--text);">Tempo</span></div>
+      <div class="cat-item" style="text-align:center;cursor:pointer;" onclick="selectCategory('Mini Bus')"><div style="width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;border:2px solid var(--border);box-shadow:0 3px 10px rgba(56,189,248,0.12);margin-bottom:0.375rem;"><img src="https://images.unsplash.com/photo-1600878459646-6d1dfa06f7a6?w=200&h=200&fit=crop" alt="Mini Bus" style="width:100%;height:100%;object-fit:cover;"></div><span style="font-size:0.625rem;font-weight:700;color:var(--text);">Mini Bus</span></div>
+      <div class="cat-item" style="text-align:center;cursor:pointer;" onclick="selectCategory('Pickup')"><div style="width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;border:2px solid var(--border);box-shadow:0 3px 10px rgba(56,189,248,0.12);margin-bottom:0.375rem;"><img src="https://images.unsplash.com/photo-1762198455091-e17ddd2f150b?w=200&h=200&fit=crop" alt="Pickup" style="width:100%;height:100%;object-fit:cover;"></div><span style="font-size:0.625rem;font-weight:700;color:var(--text);">Pickup</span></div>
+      <div class="cat-item" style="text-align:center;cursor:pointer;" onclick="selectCategory('Auto')"><div style="width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;border:2px solid var(--border);box-shadow:0 3px 10px rgba(56,189,248,0.12);margin-bottom:0.375rem;"><img src="https://images.unsplash.com/photo-1769288621924-bd4b5c53e1d4?w=200&h=200&fit=crop" alt="Auto" style="width:100%;height:100%;object-fit:cover;"></div><span style="font-size:0.625rem;font-weight:700;color:var(--text);">Auto</span></div>
+    </div>
+  </div>
+
+  <!-- Popular Vehicles -->
+  <div style="padding:0 1rem 0.625rem;">
+    <div class="section-header"><span style="font-weight:700;font-size:0.8125rem;color:var(--text);">Popular Vehicles</span><span style="font-size:0.6875rem;color:var(--primary);font-weight:600;cursor:pointer;" onclick="App.selectedCategory=null;navigateTo('explore-screen');">See All →</span></div>
+    <div id="popular-vehicles" style="margin-top:0.5rem;display:flex;flex-direction:column;gap:0.5rem;">
+      <div style="text-align:center;padding:0.75rem;color:var(--text-muted);font-size:0.6875rem;">Loading vehicles...</div>
+    </div>
+  </div>
+  <!-- Group Tours -->
+  <div style="padding:0 1rem 0.625rem;">
+    <div class="section-header"><span style="font-weight:700;font-size:0.8125rem;color:var(--text);">Group Tours</span><span style="font-size:0.6875rem;color:var(--primary);font-weight:600;">View All →</span></div>
+    <div id="home-tours" style="margin-top:0.5rem;display:flex;flex-direction:column;gap:0.5rem;">
+      <div style="text-align:center;padding:0.75rem;color:var(--text-muted);font-size:0.6875rem;">Loading tours...</div>
+    </div>
+  </div>
+  <div style="height:1.5rem;"></div>
+</div>
+
+<!-- EXPLORE / SEARCH -->
+<div class="screen" id="explore-screen" style="padding-bottom:72px;">
+  <div style="padding:0.75rem 1rem 0.375rem;">
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <button class="btn btn-ghost" onclick="navigateTo('home-screen')" style="width:36px;height:36px;border-radius:10px;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-arrow-left" style="font-size:0.875rem;"></i></button>
+      <div style="flex:1;display:flex;align-items:center;gap:0.375rem;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:0.5rem 0.625rem;"><i class="bi bi-search" style="color:var(--text-muted);font-size:0.8125rem;"></i><input type="text" placeholder="Search vehicles, destinations..." style="border:none;background:transparent;flex:1;outline:none;color:var(--text);font-size:0.8125rem;font-family:inherit;"></div>
+      <button class="btn btn-ghost" style="width:36px;height:36px;border-radius:10px;padding:0;display:flex;align-items:center;justify-content:center;"><i class="bi bi-sliders" style="font-size:0.875rem;"></i></button>
+    </div>
+  </div>
+  <div style="padding:0.25rem 1rem 0.5rem;overflow-x:auto;white-space:nowrap;display:flex;gap:0.375rem;">
+    <span class="filter-pill active" style="font-size:0.75rem;padding:0.25rem 0.625rem;cursor:pointer;" onclick="App.selectedCategory=null;loadExploreScreen();">All</span>
+    <span class="filter-pill" style="font-size:0.75rem;padding:0.25rem 0.625rem;cursor:pointer;" onclick="selectCategory('SUV')">SUV</span>
+    <span class="filter-pill" style="font-size:0.75rem;padding:0.25rem 0.625rem;cursor:pointer;" onclick="selectCategory('Sedan')">Sedan</span>
+    <span class="filter-pill" style="font-size:0.75rem;padding:0.25rem 0.625rem;cursor:pointer;" onclick="selectCategory('Luxury')">Luxury</span>
+    <span class="filter-pill" style="font-size:0.75rem;padding:0.25rem 0.625rem;cursor:pointer;" onclick="selectCategory('Budget')">Budget</span>
+    <span class="filter-pill" style="font-size:0.75rem;padding:0.25rem 0.625rem;cursor:pointer;" onclick="selectCategory('Electric')">Electric</span>
+  </div>
+  <div style="padding:0 1rem 0.5rem;border-radius:14px;overflow:hidden;height:120px;background:linear-gradient(135deg,#E0F2FE,#BAE6FD);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;border:1px solid var(--border);">
+    <i class="bi bi-map" style="font-size:1.75rem;color:var(--primary);opacity:0.6;margin-bottom:0.25rem;"></i>
+    <span style="color:var(--text);font-size:0.6875rem;font-weight:600;">Map View — 12 vehicles nearby</span>
+  </div>
+  <div style="padding:0.5rem 1rem 0;">
+    <div class="section-header"><span style="font-weight:700;font-size:0.8125rem;color:var(--text);">Available Vehicles</span><span style="font-size:0.625rem;color:var(--text-muted);">12 results</span></div>
+  </div>
+  <div id="explore-vehicles" style="padding:0.5rem 1rem 0.75rem;display:flex;flex-direction:column;gap:0.5rem;">
+    <div style="text-align:center;padding:0.75rem;color:var(--text-muted);font-size:0.6875rem;">Loading vehicles...</div>
+  </div>
+</div>
+
+<!-- VEHICLE DETAIL -->
+<div class="screen" id="vehicle-detail-screen" style="padding-bottom:72px;">
+  <div style="position:relative;height:200px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;">
+    <img id="vd-hero-image" src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&h=400&fit=crop" alt="Vehicle" style="width:100%;height:160px;object-fit:cover;" loading="lazy">
+    <div style="position:absolute;top:0;left:0;right:0;padding:0.5rem;display:flex;justify-content:space-between;z-index:2;">
+      <button class="btn btn-ghost" onclick="navigateTo('home-screen')" style="width:36px;height:36px;border-radius:10px;padding:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);color:var(--text);border:1px solid var(--border);"><i class="bi bi-arrow-left" style="font-size:0.875rem;"></i></button>
+      <div style="display:flex;gap:0.375rem;">
+        <button class="btn btn-ghost" style="width:36px;height:36px;border-radius:10px;padding:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);color:var(--text);border:1px solid var(--border);"><i class="bi bi-share" style="font-size:0.875rem;"></i></button>
+        <button class="btn btn-ghost" id="fav-btn" style="width:36px;height:36px;border-radius:10px;padding:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);color:var(--text);border:1px solid var(--border);" onclick="this.querySelector('i').classList.toggle('bi-heart-fill');this.querySelector('i').classList.toggle('bi-heart');"><i class="bi bi-heart" style="font-size:0.875rem;"></i></button>
+      </div>
+    </div>
+    <div id="vd-gallery" style="display:flex;gap:0.25rem;padding:0.25rem 0.5rem;overflow-x:auto;flex-shrink:0;"></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:0.5rem 0.625rem;">
+    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.25rem;">
+      <div id="vd-header"><h2 style="font-size:0.875rem;font-weight:800;color:var(--text);margin:0;letter-spacing:-0.02em;">Loading...</h2><p style="color:var(--text-muted);font-size:0.5625rem;margin:0.0625rem 0 0;">...</p></div>
+      <span id="vd-badge" class="badge badge-success" style="font-size:0.5rem;"><i class="bi bi-check-circle-fill"></i> Available</span>
+    </div>
+    <div id="vd-rating" style="display:flex;align-items:center;gap:0.25rem;margin-bottom:0.375rem;"></div>
+    
+    <div id="vd-specs" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.25rem;margin-bottom:0.375rem;"></div>
+    
+    <div id="vd-features" style="margin-bottom:0.375rem;display:none;">
+      <div id="vd-features-list" style="display:flex;flex-wrap:wrap;gap:0.2rem;"></div>
+    </div>
+
+    <!-- Compact collapsible sections -->
+    <div id="vd-details-section" style="margin-bottom:0.375rem;display:none;">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+        <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'" style="padding:0.5rem 0.625rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+          <span style="font-size:0.6875rem;font-weight:700;color:var(--text);">More Details <i class="bi bi-chevron-down" style="font-size:0.5rem;"></i></span>
+          <span style="font-size:0.5rem;color:var(--text-muted);">Inclusions, Terms & more</span>
+        </div>
+        <div id="vd-details-body" style="display:none;padding:0 0.625rem 0.5rem;border-top:1px solid var(--border);">
+          <div id="vd-inclusions" style="padding:0.375rem 0;display:none;">
+            <span style="font-size:0.5625rem;font-weight:700;color:var(--success);"><i class="bi bi-check-circle-fill"></i> Inclusions</span>
+            <div id="vd-inclusions-list" style="display:flex;flex-direction:column;gap:0.0625rem;margin-top:0.125rem;font-size:0.5625rem;"></div>
+          </div>
+          <div id="vd-exclusions" style="padding:0.375rem 0;display:none;border-top:1px solid var(--border);">
+            <span style="font-size:0.5625rem;font-weight:700;color:var(--danger);"><i class="bi bi-x-circle-fill"></i> Exclusions</span>
+            <div id="vd-exclusions-list" style="display:flex;flex-direction:column;gap:0.0625rem;margin-top:0.125rem;font-size:0.5625rem;"></div>
+          </div>
+          <div id="vd-facilities" style="padding:0.375rem 0;display:none;border-top:1px solid var(--border);">
+            <span style="font-size:0.5625rem;font-weight:700;color:var(--primary);"><i class="bi bi-gear-wide-connected"></i> Facilities</span>
+            <div id="vd-facilities-list" style="display:flex;flex-direction:column;gap:0.0625rem;margin-top:0.125rem;font-size:0.5625rem;"></div>
+          </div>
+          <div id="vd-terms" style="padding:0.375rem 0;display:none;border-top:1px solid var(--border);">
+            <span style="font-size:0.5625rem;font-weight:700;color:var(--warning);"><i class="bi bi-file-text"></i> Terms</span>
+            <div id="vd-terms-list" style="display:flex;flex-direction:column;gap:0.0625rem;margin-top:0.125rem;font-size:0.5625rem;"></div>
+          </div>
+          <div id="vd-cancellation" style="padding:0.375rem 0;display:none;border-top:1px solid var(--border);">
+            <span style="font-size:0.5625rem;font-weight:700;color:var(--warning);"><i class="bi bi-shield-exclamation"></i> Cancellation</span>
+            <p id="vd-cancellation-text" style="font-size:0.5625rem;color:var(--text-secondary);margin:0.125rem 0 0;line-height:1.3;"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing -->
+    <div style="margin-bottom:0.375rem;padding:0.5rem;background:var(--bg-card);border-radius:10px;border:1px solid var(--border);">
+      <h4 style="font-size:0.6875rem;font-weight:700;color:var(--text);margin:0 0 0.25rem;display:flex;align-items:center;gap:0.25rem;"><i class="bi bi-currency-rupee" style="color:var(--primary);font-size:0.625rem;"></i> Pricing</h4>
+      <div id="vehicle-pricing" style="font-size:0.5625rem;"></div>
+    </div>
+
+    <!-- Outstation Packages -->
+    <div id="vd-packages" style="margin-bottom:0.375rem;padding:0.5rem;background:var(--bg-card);border-radius:10px;border:1px solid var(--border);display:none;">
+      <h4 style="font-size:0.6875rem;font-weight:700;color:var(--text);margin:0 0 0.25rem;display:flex;align-items:center;gap:0.25rem;"><i class="bi bi-suitcase" style="color:var(--warning);font-size:0.625rem;"></i> Outstation Packages</h4>
+      <div id="vd-packages-list" style="font-size:0.5625rem;"></div>
+    </div>
+
+    <!-- Reviews -->
+    <div id="vd-reviews" style="margin-bottom:0.375rem;">
+      <div style="display:flex;align-items:center;gap:0.375rem;margin-bottom:0.25rem;"><span style="font-weight:700;font-size:0.6875rem;color:var(--text);"><i class="bi bi-star" style="color:var(--warning);font-size:0.5rem;"></i> Reviews</span></div>
+      <div id="vd-reviews-list" style="display:flex;flex-direction:column;gap:0.25rem;">
+        <div style="text-align:center;padding:0.5rem;color:var(--text-muted);font-size:0.5625rem;">No reviews yet</div>
+      </div>
+    </div>
+    
+    <!-- Driver (no ratings) -->
+    <div id="vd-driver" style="display:none;margin-bottom:0.375rem;padding:0.5rem;background:var(--bg-card);border-radius:10px;border:1px solid var(--border);">
+      <h4 style="font-size:0.6875rem;font-weight:700;color:var(--text);margin:0 0 0.25rem;display:flex;align-items:center;gap:0.25rem;"><i class="bi bi-person-badge" style="color:var(--primary);font-size:0.625rem;"></i> Driver Details</h4>
+      <div id="vd-driver-info" style="font-size:0.5625rem;color:var(--text-muted);"></div>
+    </div>
+  </div>
+
+  <!-- Sticky Bottom -->
+  <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--border);padding:0.5rem 0.75rem calc(env(safe-area-inset-bottom) + 4rem);display:flex;align-items:center;gap:0.5rem;z-index:50;">
+    <div id="sticky-price"><div style="font-size:0.5rem;color:var(--text-muted);">Starting from</div><div class="price-dark" style="font-size:1rem;">₹<span id="sticky-rate">18</span><span style="font-size:0.5rem;font-weight:600;color:#64748B;">/km</span></div></div>
+    <button class="btn btn-primary btn-lg" style="flex:1;border-radius:10px;font-size:0.75rem;padding:0.5rem;" onclick="navigateTo('booking-screen')">Book Now <i class="bi bi-arrow-right" style="font-size:0.75rem;"></i></button>
+  </div>
+</div>
+
+<!-- BOOKING -->
+<div class="screen" id="booking-screen" style="padding-bottom:72px;">
+  <div style="padding:0.5rem 0.75rem 0;display:flex;align-items:center;gap:0.5rem;">
+    <button class="btn btn-ghost" onclick="navigateTo('vehicle-detail-screen')" style="width:36px;height:36px;border-radius:10px;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-arrow-left" style="font-size:1rem;"></i></button>
+    <div style="flex:1;"><h2 style="font-size:1.125rem;font-weight:800;color:var(--text);margin:0;letter-spacing:-0.02em;">Book Vehicle</h2><p id="booking-vehicle-info" style="color:var(--text-muted);font-size:0.6875rem;margin:0;">Loading...</p></div>
+  </div>
+  <div style="padding:0 0.875rem 0.75rem;padding-bottom:calc(0.75rem + 80px);">
+    <!-- 2-step stepper -->
+    <div style="display:flex;align-items:center;gap:0.375rem;margin-bottom:0.75rem;">
+      <div style="display:flex;align-items:center;gap:0.375rem;"><div style="width:22px;height:22px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.625rem;">1</div><span style="font-size:0.625rem;font-weight:600;color:var(--primary);">Details</span></div>
+      <div style="width:32px;height:1px;background:var(--border);"></div>
+      <div style="display:flex;align-items:center;gap:0.375rem;"><div id="step2-circle" style="width:22px;height:22px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-weight:600;font-size:0.625rem;">2</div><span id="step2-label" style="font-size:0.625rem;color:var(--text-muted);">Payment</span></div>
+    </div>
+
+    <!-- STEP 1: Route + Trip Details (compact) -->
+    <div class="booking-step" id="booking-step-1">
+      <!-- Trip Type Pills -->
+      <div style="display:flex;gap:0.375rem;margin-bottom:0.625rem;">
+        <button class="trip-type" data-trip="one_way" style="flex:1;padding:0.5rem;border-radius:10px;border:2px solid var(--primary);background:rgba(56,189,248,0.1);color:var(--primary);font-weight:700;font-size:0.75rem;cursor:pointer;" onclick="selectTripType('one_way',this)">One Way</button>
+        <button class="trip-type" data-trip="round_trip" style="flex:1;padding:0.5rem;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-muted);font-size:0.75rem;cursor:pointer;" onclick="selectTripType('round_trip',this)">Round Trip</button>
+        <button class="trip-type" data-trip="hourly" style="flex:1;padding:0.5rem;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-muted);font-size:0.75rem;cursor:pointer;" onclick="selectTripType('hourly',this)">Hourly</button>
+      </div>
+
+      <!-- Pickup/Drop -->
+      <div style="margin-bottom:0.5rem;">
+        <div style="display:flex;align-items:center;gap:0.375rem;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:0.5rem 0.75rem;margin-bottom:0.25rem;"><i class="bi bi-circle-fill" style="color:var(--success);font-size:0.375rem;flex-shrink:0;"></i><input type="text" id="booking-pickup" class="form-input gm-input" placeholder="Pickup location" style="border:none;background:transparent;flex:1;outline:none;color:var(--text);font-size:0.8125rem;"></div>
+        <div style="display:flex;align-items:center;gap:0.375rem;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:0.5rem 0.75rem;"><i class="bi bi-square-fill" style="color:var(--danger);font-size:0.375rem;flex-shrink:0;"></i><input type="text" id="booking-drop" class="form-input gm-input" placeholder="Destination" style="border:none;background:transparent;flex:1;outline:none;color:var(--text);font-size:0.8125rem;"></div>
+      </div>
+
+      <!-- Map -->
+      <div style="margin-bottom:0.5rem;border-radius:12px;overflow:hidden;border:1px solid var(--border);height:110px;position:relative;">
+        <div id="map-picker" style="width:100%;height:100%;background:linear-gradient(135deg,#E2E8F0,#F1F5F9);"></div>
+        <div style="position:absolute;top:0.25rem;right:0.375rem;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);padding:0.25rem 0.5rem;border-radius:8px;font-size:0.5625rem;color:white;z-index:5;"><i class="bi bi-geo-alt"></i> Tap map</div>
+      </div>
+      <input type="hidden" id="booking-pickup-lat"><input type="hidden" id="booking-pickup-lng">
+      <input type="hidden" id="booking-drop-lat"><input type="hidden" id="booking-drop-lng">
+
+      <!-- City + Date/Time (compact grid) -->
+      <div id="booking-extras" style="margin-bottom:0.5rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.375rem;margin-bottom:0.375rem;">
+          <div><input type="text" id="booking-pickup-city" style="width:100%;padding:0.5rem 0.75rem;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-size:0.75rem;outline:none;box-sizing:border-box;" placeholder="Pickup city"></div>
+          <div id="drop-city-wrap"><input type="text" id="booking-drop-city" style="width:100%;padding:0.5rem 0.75rem;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-size:0.75rem;outline:none;box-sizing:border-box;" placeholder="Drop city"></div>
+          <div><input type="date" id="booking-date" style="width:100%;padding:0.5rem 0.75rem;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-size:0.75rem;outline:none;box-sizing:border-box;color-scheme:dark;"></div>
+          <div><input type="time" id="booking-time" style="width:100%;padding:0.5rem 0.75rem;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-size:0.75rem;outline:none;box-sizing:border-box;color-scheme:dark;" value="09:00"></div>
+        </div>
+        <!-- Return (round trip) -->
+        <div id="step2-return-section" style="display:none;grid-template-columns:1fr 1fr;gap:0.375rem;margin-bottom:0.375rem;">
+          <div><input type="date" id="booking-return-date" style="width:100%;padding:0.5rem 0.75rem;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-size:0.75rem;outline:none;box-sizing:border-box;color-scheme:dark;"></div>
+          <div><input type="time" id="booking-return-time" style="width:100%;padding:0.5rem 0.75rem;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-size:0.75rem;outline:none;box-sizing:border-box;color-scheme:dark;" value="18:00"></div>
+        </div>
+        <!-- Hourly packages -->
+        <div id="step2-hourly-section" style="display:none;margin-bottom:0.375rem;">
+          <div style="display:flex;flex-direction:column;gap:0.375rem;" id="hourly-packages"><span style="font-size:0.6875rem;color:var(--text-muted);">Loading packages...</span></div>
+        </div>
+        <!-- Stops -->
+        <div id="stops-section">
+          <div id="stops-container"></div>
+          <button onclick="addStop()" style="padding:0.375rem 0.75rem;border-radius:8px;border:1px dashed var(--border);background:transparent;color:var(--primary);font-size:0.6875rem;cursor:pointer;width:100%;"><i class="bi bi-plus-circle"></i> Add Stop</button>
+        </div>
+      </div>
+
+      <!-- Notes + Distance -->
+      <textarea id="booking-notes" style="width:100%;padding:0.5rem 0.75rem;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-family:inherit;font-size:0.75rem;resize:none;min-height:44px;outline:none;box-sizing:border-box;margin-bottom:0.375rem;" placeholder="Notes (optional)"></textarea>
+      <div style="display:flex;justify-content:space-between;padding:0.5rem 0.75rem;background:var(--bg-card);border-radius:10px;border:1px solid var(--border);"><span style="color:var(--text-muted);font-size:0.75rem;">Distance</span><span id="booking-distance" style="font-weight:700;color:var(--text);font-size:0.8125rem;">-- km</span></div>
+    </div>
+
+    <!-- STEP 2: Payment (compact) -->
+    <div class="booking-step" id="booking-step-2" style="display:none;">
+      <!-- Free Cancellation -->
+      <div style="padding:0.5rem 0.75rem;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:10px;margin-bottom:0.625rem;display:flex;align-items:center;gap:0.5rem;">
+        <i class="bi bi-shield-check" style="color:var(--success);font-size:1rem;"></i>
+        <div><div style="font-size:0.6875rem;font-weight:700;color:var(--success);">Free Cancellation</div><div style="font-size:0.5625rem;color:var(--text-muted);">Cancel within 30 min — full refund</div></div>
+      </div>
+      <!-- Fare Summary -->
+      <div style="padding:0.75rem;background:var(--bg-card);border-radius:12px;border:1px solid var(--border);margin-bottom:0.625rem;">
+        <div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border);"><span style="font-size:0.6875rem;color:var(--text-muted);">Trip Type</span><span id="fare-trip-type" style="font-weight:600;color:var(--text);font-size:0.6875rem;">One Way</span></div>
+        <div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border);"><span style="font-size:0.6875rem;color:var(--text-muted);">Distance</span><span id="fare-distance" style="font-weight:600;color:var(--text);font-size:0.6875rem;">-- km</span></div>
+        <div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border);"><span style="font-size:0.6875rem;color:var(--text-muted);">Base Fare</span><span id="fare-base" style="font-weight:600;color:var(--text);font-size:0.6875rem;">₹--</span></div>
+        <div id="fare-extra-row" style="display:none;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border);"><span style="font-size:0.6875rem;color:var(--text-muted);">Extra KM</span><span id="fare-extra" style="font-weight:600;color:var(--text);font-size:0.6875rem;">₹--</span></div>
+        <div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border);"><span style="font-size:0.6875rem;color:var(--text-muted);">GST (5%)</span><span id="fare-tax" style="font-weight:600;color:var(--text);font-size:0.6875rem;">₹--</span></div>
+        <div style="display:flex;justify-content:space-between;padding:0.5rem 0 0;border-top:2px solid var(--border);margin-top:0.125rem;"><span style="font-weight:700;font-size:0.875rem;color:var(--text);">Total</span><span id="fare-total" class="price-dark" style="font-size:1.125rem;">₹--</span></div>
+      </div>
+      <!-- Coupon -->
+      <div style="display:flex;gap:0.375rem;margin-bottom:0.5rem;">
+        <input type="text" id="coupon-input" style="flex:1;padding:0.5rem 0.75rem;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-size:0.75rem;outline:none;box-sizing:border-box;" placeholder="Coupon code">
+        <button onclick="applyCoupon()" style="padding:0.5rem 0.75rem;border-radius:10px;border:none;background:var(--primary);color:white;font-weight:600;font-size:0.75rem;cursor:pointer;">Apply</button>
+      </div>
+      <div id="coupon-msg" style="font-size:0.625rem;margin:0 0 0.5rem;display:none;"></div>
+      <!-- Payment -->
+      <div style="display:flex;flex-direction:column;gap:0.375rem;">
+        <label style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;cursor:pointer;"><input type="radio" name="payment" value="UPI" checked style="accent-color:var(--primary);"><i class="bi bi-phone" style="color:var(--primary);font-size:0.875rem;"></i><span style="font-weight:600;font-size:0.75rem;color:var(--text);flex:1;">UPI</span><span style="font-size:0.5625rem;color:var(--text-muted);">GPay, PhonePe</span></label>
+        <label style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;cursor:pointer;"><input type="radio" name="payment" value="Card" style="accent-color:var(--primary);"><i class="bi bi-credit-card" style="color:var(--secondary);font-size:0.875rem;"></i><span style="font-weight:600;font-size:0.75rem;color:var(--text);flex:1;">Card</span><span style="font-size:0.5625rem;color:var(--text-muted);">Credit/Debit</span></label>
+        <label style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;cursor:pointer;"><input type="radio" name="payment" value="Cash" style="accent-color:var(--primary);"><i class="bi bi-wallet2" style="color:var(--success);font-size:0.875rem;"></i><span style="font-weight:600;font-size:0.75rem;color:var(--text);flex:1;">Cash</span><span style="font-size:0.5625rem;color:var(--text-muted);">Pay on trip end</span></label>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
+      <button id="booking-back" class="btn btn-block" style="padding:0.625rem;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);color:var(--text);display:none;">Back</button>
+      <button id="booking-next" class="btn btn-primary btn-lg btn-block" style="border-radius:10px;padding:0.625rem;" onclick="nextBookingStep()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIVE TRACKING -->
+<div class="screen" id="tracking-screen" style="padding-bottom:0;">
+  <div style="flex:1;display:flex;flex-direction:column;background:linear-gradient(135deg,#E0F2FE,#BAE6FD);position:relative;">
+    <div style="padding:0.75rem;display:flex;justify-content:space-between;position:absolute;top:0;left:0;right:0;z-index:5;">
+      <button class="btn btn-ghost" onclick="navigateTo('home-screen')" style="width:44px;height:44px;border-radius:14px;padding:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);color:var(--text);border:1px solid var(--border);"><i class="bi bi-arrow-left"></i></button>
+        <button id="tracking-share-btn" class="btn btn-ghost" onclick="shareNavigationLink()" style="width:44px;height:44px;border-radius:14px;padding:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);color:var(--text);border:1px solid var(--border);"><i class="bi bi-share"></i></button>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <i class="bi bi-map" style="font-size:4rem;color:var(--primary);opacity:0.6;margin-bottom:1rem;"></i>
+      <div style="background:rgba(56,189,248,0.12);padding:0.5rem 1rem;border-radius:20px;display:flex;align-items:center;gap:0.5rem;">
+        <div class="pulse" style="width:10px;height:10px;border-radius:50%;background:var(--success);"></div>
+        <span style="color:white;font-weight:600;font-size:0.875rem;">Live Tracking Active</span>
+      </div>
+    </div>
+    <div style="background:var(--card);border-radius:24px 24px 0 0;padding:1.5rem;margin-top:-1rem;position:relative;z-index:5;">
+      <div style="width:40px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 1rem;"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div><span class="badge badge-success" style="font-size:0.625rem;"><i class="bi bi-check-circle-fill"></i> Driver on the way</span></div>
+        <div style="text-align:right;"><div id="tracking-distance" style="font-size:1.5rem;font-weight:900;color:var(--text);">--</div><div style="font-size:0.6875rem;color:var(--text-muted);">km away</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;"><div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#38BDF8,#7DD3FC);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:1.125rem;" id="tracking-driver-avatar">A</div><div style="flex:1;"><div style="font-weight:700;color:var(--text);font-size:0.9375rem;" id="tracking-driver-name">Assigning driver...</div><div style="font-size:0.75rem;color:var(--text-muted);" id="tracking-driver-detail"></div></div></div>
+      <div id="otp-display" style="text-align:center;margin-bottom:1.25rem;padding:1rem;background:var(--bg-secondary);border-radius:16px;border:1px solid var(--border);"><div style="font-size:0.6875rem;color:var(--text-muted);margin-bottom:0.5rem;">Show OTP to driver</div><div style="display:flex;justify-content:center;gap:0.75rem;"><span style="font-size:2rem;font-weight:900;color:var(--text);letter-spacing:0.1em;">4 8 2 9</span></div></div>
+      <button id="tracking-navigate-btn" onclick="openNavigation()" style="width:100%;padding:0.75rem;border-radius:14px;background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.2);color:var(--primary);font-weight:700;font-size:0.875rem;cursor:pointer;margin-bottom:0.75rem;"><i class="bi bi-map"></i> Open in Google Maps</button>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;">
+        <button style="padding:0.75rem;border-radius:14px;background:rgba(56,189,248,0.1);border:none;color:var(--primary);display:flex;flex-direction:column;align-items:center;gap:0.25rem;cursor:pointer;"><i class="bi bi-telephone-fill" style="font-size:1.1rem;"></i><span style="font-size:0.625rem;font-weight:600;">Call</span></button>
+        <button style="padding:0.75rem;border-radius:14px;background:rgba(6,182,212,0.1);border:none;color:var(--secondary);display:flex;flex-direction:column;align-items:center;gap:0.25rem;cursor:pointer;"><i class="bi bi-chat-dots-fill" style="font-size:1.1rem;"></i><span style="font-size:0.625rem;font-weight:600;">Chat</span></button>
+        <button onclick="shareNavigationLink()" style="padding:0.75rem;border-radius:14px;background:rgba(34,197,94,0.1);border:none;color:var(--success);display:flex;flex-direction:column;align-items:center;gap:0.25rem;cursor:pointer;"><i class="bi bi-share-fill" style="font-size:1.1rem;"></i><span style="font-size:0.625rem;font-weight:600;">Share</span></button>
+        <button onclick="sendSOS()" style="padding:0.75rem;border-radius:14px;background:rgba(239,68,68,0.1);border:none;color:var(--danger);display:flex;flex-direction:column;align-items:center;gap:0.25rem;cursor:pointer;"><i class="bi bi-exclamation-triangle-fill" style="font-size:1.1rem;"></i><span style="font-size:0.625rem;font-weight:600;">SOS</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKINGS -->
+<div class="screen" id="bookings-screen" style="padding-bottom:72px;">
+  <div style="padding:0.75rem 1rem 0.375rem;"><h2 style="font-size:1.125rem;font-weight:800;color:var(--text);letter-spacing:-0.02em;">My Bookings</h2></div>
+  <div style="padding:0 1rem 0.5rem;display:flex;gap:0.375rem;">
+    <button class="filter-pill active" style="font-size:0.75rem;padding:0.25rem 0.625rem;" onclick="filterBookings('upcoming',this)">Upcoming</button>
+    <button class="filter-pill" style="font-size:0.75rem;padding:0.25rem 0.625rem;" onclick="filterBookings('completed',this)">Completed</button>
+    <button class="filter-pill" onclick="filterBookings('cancelled',this)">Cancelled</button>
+  </div>
+  <div id="bookings-list" style="padding:0 1rem 0.75rem;display:flex;flex-direction:column;gap:0.5rem;">
+    <div style="text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:0.8125rem;">Loading bookings...</div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="screen" id="notifications-screen" style="padding-bottom:72px;">
+  <div style="padding:0.75rem 1rem 0.375rem;"><h2 style="font-size:1.125rem;font-weight:800;color:var(--text);letter-spacing:-0.02em;">Notifications</h2></div>
+  <div id="notifications-list" style="padding:0 1rem 0.75rem;display:flex;flex-direction:column;gap:0.375rem;">
+    <div style="text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:0.8125rem;">Loading notifications...</div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div class="screen" id="profile-screen" style="padding-bottom:72px;">
+  <div style="text-align:center;padding:1.5rem 1rem 1rem;background:linear-gradient(135deg,rgba(56,189,248,0.05),rgba(6,182,212,0.05));margin-bottom:0.25rem;">
+    <div style="position:relative;display:inline-block;"><div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#38BDF8,#7DD3FC);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:1.5rem;margin:0 auto 0.5rem;box-shadow:0 0 20px rgba(56,189,248,0.3);">JD</div><div style="position:absolute;bottom:8px;right:0;width:22px;height:22px;border-radius:50%;background:var(--bg-card);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;color:var(--primary);"><i class="bi bi-pencil" style="font-size:0.625rem;"></i></div></div>
+    <h2 style="font-size:1rem;font-weight:800;color:var(--text);margin:0;letter-spacing:-0.02em;">John Doe</h2>
+    <p style="font-size:0.6875rem;color:var(--text-muted);margin:0 0 0.75rem;">+91 98765 43210</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.375rem;">
+      <div style="padding:0.5rem;background:var(--bg-card);border-radius:10px;border:1px solid var(--border);"><div style="font-size:1rem;font-weight:900;color:var(--primary);">12</div><div style="font-size:0.5625rem;color:var(--text-muted);">Bookings</div></div>
+      <div style="padding:0.5rem;background:var(--bg-card);border-radius:10px;border:1px solid var(--border);"><div style="font-size:1rem;font-weight:900;color:var(--secondary);">₹8.5k</div><div style="font-size:0.5625rem;color:var(--text-muted);">Wallet</div></div>
+      <div style="padding:0.5rem;background:var(--bg-card);border-radius:10px;border:1px solid var(--border);"><div style="font-size:1rem;font-weight:900;color:var(--success);">4.6</div><div style="font-size:0.5625rem;color:var(--text-muted);">Rating</div></div>
+    </div>
+  </div>
+  <div style="padding:0 1rem 0.75rem;display:flex;flex-direction:column;gap:0.125rem;">
+    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.625rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-person" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">Edit Profile</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
+    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.625rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-geo-alt" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">Saved Addresses</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
+    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.625rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-wallet2" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">Wallet</span><span style="font-size:0.6875rem;font-weight:700;color:var(--success);">₹8,500</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
+    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.625rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-receipt" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">Invoices</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
+    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.625rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-star" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">My Reviews</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
+    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.625rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-bell" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">Notifications</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
+    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.625rem 0.625rem;border-radius:10px;"><i class="bi bi-moon" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">Dark Mode</span><label class="toggle" style="position:relative;display:inline-block;width:36px;height:20px;"><input type="checkbox" id="theme-toggle" onchange="toggleTheme()" style="opacity:0;width:0;height:0;"><span class="slider" style="position:absolute;inset:0;background:var(--border);border-radius:10px;cursor:pointer;transition:all 0.3s;"></span></label></div>
+    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.625rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-headset" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">Help & Support</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
+    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.625rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-info-circle" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">About TripAny</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
+    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.625rem 0.625rem;border-radius:10px;cursor:pointer;margin-top:0.375rem;"><i class="bi bi-box-arrow-right" style="width:16px;color:var(--danger);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:600;color:var(--danger);">Logout</span></div>
+  </div>
+</div>
+
+<!-- TOUR DETAIL -->
+<div class="screen" id="tour-detail-screen">
+  <div style="padding:0.75rem 0.75rem 0;display:flex;align-items:center;gap:0.5rem;">
+    <button class="btn btn-ghost" onclick="navigateTo('home-screen')" style="width:40px;height:40px;border-radius:12px;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-arrow-left" style="font-size:1rem;"></i></button>
+    <h2 style="font-size:1rem;font-weight:800;color:var(--text);margin:0;">Tour Details</h2>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:0.75rem 1rem 6rem;">
+    <div id="tour-detail-hero" style="width:100%;height:180px;border-radius:16px;overflow:hidden;margin-bottom:1rem;background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(239,68,68,0.1));display:flex;align-items:center;justify-content:center;">
+      <i class="bi bi-suitcase-lg-fill" style="font-size:3rem;color:var(--warning);opacity:0.5;"></i>
+    </div>
+    <h2 id="tour-detail-title" style="font-size:1.25rem;font-weight:800;color:var(--text);margin:0 0 0.25rem;">Tour Title</h2>
+    <p id="tour-detail-dest" style="font-size:0.8125rem;color:var(--text-muted);margin:0 0 0.75rem;"><i class="bi bi-geo-alt-fill" style="color:var(--primary);"></i> Destination</p>
+    <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+      <div style="flex:1;text-align:center;padding:0.625rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;"><div style="font-size:0.5625rem;color:var(--text-muted);margin-bottom:0.25rem;">Date</div><div id="tour-detail-date" style="font-size:0.75rem;font-weight:700;color:var(--text);">--</div></div>
+      <div style="flex:1;text-align:center;padding:0.625rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;"><div style="font-size:0.5625rem;color:var(--text-muted);margin-bottom:0.25rem;">Spots Left</div><div id="tour-detail-spots" style="font-size:0.75rem;font-weight:700;color:var(--primary);">--</div></div>
+      <div style="flex:1;text-align:center;padding:0.625rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;"><div style="font-size:0.5625rem;color:var(--text-muted);margin-bottom:0.25rem;">Vehicle</div><div id="tour-detail-vehicle" style="font-size:0.75rem;font-weight:700;color:var(--text);">--</div></div>
+    </div>
+    <div id="tour-detail-desc" style="font-size:0.8125rem;color:var(--text-secondary);line-height:1.6;margin-bottom:1rem;"></div>
+    <div style="margin-bottom:1rem;">
+      <h3 style="font-size:0.875rem;font-weight:700;color:var(--text);margin:0 0 0.5rem;">What's Included</h3>
+      <div id="tour-detail-includes" style="display:flex;flex-wrap:wrap;gap:0.375rem;"></div>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <h3 style="font-size:0.875rem;font-weight:700;color:var(--text);margin:0 0 0.5rem;">Add-ons Available</h3>
+      <div id="tour-detail-addons" style="display:flex;flex-direction:column;gap:0.375rem;"></div>
+    </div>
+    <div style="padding:0.75rem;background:linear-gradient(135deg,rgba(56,189,248,0.06),rgba(56,189,248,0.1));border-radius:12px;border:1px solid rgba(56,189,248,0.15);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-size:0.625rem;color:var(--text-muted);">Price per person</div><div id="tour-detail-price" class="price-dark" style="font-size:1.25rem;">₹0</div></div>
+        <button class="btn btn-primary" onclick="navigateTo('tour-booking-screen')" style="border-radius:12px;padding:0.625rem 1.5rem;font-weight:700;">Book Now</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOUR BOOKING -->
+<div class="screen" id="tour-booking-screen">
+  <div style="padding:0.75rem 0.75rem 0;display:flex;align-items:center;gap:0.5rem;">
+    <button class="btn btn-ghost" onclick="navigateTo('tour-detail-screen')" style="width:40px;height:40px;border-radius:12px;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-arrow-left" style="font-size:1rem;"></i></button>
+    <h2 style="font-size:1rem;font-weight:800;color:var(--text);margin:0;">Book Tour</h2>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:1rem;">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:1rem;margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+        <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(239,68,68,0.2));display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-suitcase-lg-fill" style="color:var(--warning);"></i></div>
+        <div><div id="tb-title" style="font-weight:700;font-size:0.875rem;color:var(--text);">Tour Title</div><div id="tb-dest" style="font-size:0.6875rem;color:var(--text-muted);">Destination</div></div>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-bottom:0.75rem;">
+        <div style="flex:1;font-size:0.6875rem;color:var(--text-muted);"><i class="bi bi-calendar"></i> <span id="tb-date">--</span></div>
+        <div style="flex:1;font-size:0.6875rem;color:var(--text-muted);"><i class="bi bi-people"></i> <span id="tb-spots">--</span></div>
+      </div>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:1rem;margin-bottom:1rem;">
+      <label style="font-size:0.75rem;font-weight:700;color:var(--text);display:block;margin-bottom:0.5rem;">Number of People</label>
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <button onclick="updateTourPersons(-1)" style="width:40px;height:40px;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:1.25rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">-</button>
+        <span id="tour-persons" style="font-size:1.5rem;font-weight:800;color:var(--text);min-width:40px;text-align:center;">1</span>
+        <button onclick="updateTourPersons(1)" style="width:40px;height:40px;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:1.25rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+      </div>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:1rem;margin-bottom:1rem;">
+      <h3 style="font-size:0.75rem;font-weight:700;color:var(--text);margin:0 0 0.5rem;">Add-ons</h3>
+      <div id="tb-addons-list" style="display:flex;flex-direction:column;gap:0.375rem;"></div>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:1rem;margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;"><span style="font-size:0.75rem;color:var(--text-muted);">Base Price (<span id="tb-persons-label">1</span> x <span id="tb-base-price">₹0</span>)</span><span id="tb-subtotal" class="price-dark" style="font-size:0.75rem;">₹0</span></div>
+      <div id="tb-addons-row" style="display:none;justify-content:space-between;margin-bottom:0.5rem;"><span style="font-size:0.75rem;color:var(--text-muted);">Add-ons</span><span id="tb-addons-total" class="price-dark" style="font-size:0.75rem;">₹0</span></div>
+      <div style="border-top:1px dashed var(--border);padding-top:0.5rem;margin-top:0.5rem;display:flex;justify-content:space-between;"><span style="font-size:0.875rem;font-weight:700;color:var(--text);">Total</span><span id="tb-total" class="price-dark" style="font-size:1rem;">₹0</span></div>
+      <div style="margin-top:0.75rem;padding:0.5rem 0.75rem;background:rgba(56,189,248,0.06);border-radius:10px;display:flex;align-items:center;gap:0.5rem;"><i class="bi bi-info-circle" style="color:var(--primary);font-size:0.75rem;"></i><span style="font-size:0.6875rem;color:var(--text-secondary);">Pay 25% advance (₹<span id="tb-advance">0</span>) to confirm booking</span></div>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:1rem;margin-bottom:1rem;">
+      <label style="font-size:0.75rem;font-weight:700;color:var(--text);display:block;margin-bottom:0.5rem;">Payment Method</label>
+      <div style="display:flex;gap:0.5rem;">
+        <div class="tour-payment-option active" onclick="selectTourPayment('upi',this)" style="flex:1;text-align:center;padding:0.625rem;border-radius:10px;border:1.5px solid var(--primary);background:rgba(56,189,248,0.06);cursor:pointer;"><div style="font-size:1rem;">📱</div><div style="font-size:0.625rem;font-weight:600;color:var(--text);">UPI</div></div>
+        <div class="tour-payment-option" onclick="selectTourPayment('card',this)" style="flex:1;text-align:center;padding:0.625rem;border-radius:10px;border:1px solid var(--border);cursor:pointer;"><div style="font-size:1rem;">💳</div><div style="font-size:0.625rem;font-weight:600;color:var(--text);">Card</div></div>
+        <div class="tour-payment-option" onclick="selectTourPayment('cash',this)" style="flex:1;text-align:center;padding:0.625rem;border-radius:10px;border:1px solid var(--border);cursor:pointer;"><div style="font-size:1rem;">💵</div><div style="font-size:0.625rem;font-weight:600;color:var(--text);">Cash</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;padding:0.75rem 1rem;background:var(--bg);border-top:1px solid var(--border);">
+    <button class="btn btn-primary btn-lg btn-block" onclick="confirmTourBooking()" style="border-radius:14px;font-weight:700;">Pay <span class="price-dark" style="color:white !important;font-size:1rem;">₹<span id="tb-pay-amount">0</span></span> & Confirm</button>
+  </div>
+</div>
+
+<!-- LOCATION PICKER MODAL -->
+<div id="location-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1.5rem;">
+  <div style="background:var(--bg-card);border-radius:20px;padding:1.5rem;max-width:340px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <h3 style="font-size:1.0625rem;font-weight:800;color:var(--text);margin:0;">Select Location</h3>
+      <button onclick="closeLocationModal()" style="width:32px;height:32px;border-radius:8px;border:none;background:var(--bg);color:var(--text-muted);font-size:1.25rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
+    </div>
+    <div id="location-list" style="display:flex;flex-direction:column;gap:0.375rem;"></div>
+  </div>
+</div>
+
+<!-- COMING SOON MODAL -->
+<div id="coming-soon-modal" style="display:none;position:fixed;inset:0;z-index:1001;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1.5rem;">
+  <div style="background:var(--bg-card);border-radius:20px;padding:2rem 1.5rem;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,rgba(56,189,248,0.15),rgba(125,211,252,0.15));display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;"><span style="font-size:1.75rem;">😊</span></div>
+    <h3 style="font-size:1.125rem;font-weight:800;color:var(--text);margin:0 0 0.5rem;">We're Coming Soon!</h3>
+    <p id="coming-soon-text" style="font-size:0.8125rem;color:var(--text-muted);line-height:1.5;margin:0 0 0.5rem;">We're working hard to serve you better in your area.</p>
+    <p style="font-size:0.8125rem;color:var(--text-muted);line-height:1.5;margin:0 0 1.25rem;">We'll be with you sooner! Stay tuned 🙂</p>
+    <button onclick="document.getElementById('coming-soon-modal').style.display='none'" style="width:100%;padding:0.75rem;border:none;border-radius:12px;background:var(--primary);color:white;font-weight:700;font-size:0.875rem;cursor:pointer;">Got it!</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION POPUP -->
+<div id="notif-popup" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:440px;background:var(--card);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);z-index:999;padding:1.25rem;animation:slideUp 0.35s ease;">
+  <div style="display:flex;gap:12px;">
+    <div id="notif-icon" style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0;"></div>
+    <div style="flex:1;">
+      <div id="notif-title" style="font-size:0.9375rem;font-weight:800;color:#0B1420;margin:0 0 4px;"></div>
+      <div id="notif-msg" style="font-size:0.8125rem;color:#334155;line-height:1.4;margin:0 0 12px;"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="dismissNotification()" style="flex:1;padding:0.625rem;border-radius:12px;font-size:0.8125rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;background:var(--bg-secondary);color:#0B1420;">Dismiss</button>
+        <button onclick="viewNotification()" style="flex:1;padding:0.625rem;border-radius:12px;font-size:0.8125rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;background:var(--primary);color:white;">View</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav" style="display:none;">
+  <button class="nav-item active" onclick="navigateTo('home-screen')"><i class="bi bi-grid-1x2-fill"></i><span>Home</span></button>
+  <button class="nav-item" onclick="navigateTo('bookings-screen')"><i class="bi bi-calendar2-check"></i><span>Bookings</span></button>
+  <button class="nav-item" onclick="App.selectedCategory=null;navigateTo('explore-screen')"><i class="bi bi-compass"></i><span>Explore</span></button>
+  <button class="nav-item" onclick="navigateTo('notifications-screen')"><i class="bi bi-bell"></i><span>Alerts</span><span id="notif-badge" style="display:none;position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:#EF4444;color:white;font-size:9px;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid var(--nav-bg);">0</span></button>
+  <button class="nav-item" onclick="navigateTo('profile-screen')"><i class="bi bi-person"></i><span>Profile</span></button>
+</div>
+
+</div><!-- /wrapper -->
+
+<script>
+// ===================== APP STATE =====================
+var _debug = true;
+console.log('TripAny script loaded');
+const App = {
+  currentScreen: 'splash-screen',
+  theme: localStorage.getItem('tripany-theme') || 'light',
+  phoneNumber: '',
+  bookingStep: 1,
+  maxBookingSteps: 2,
+  otpCountdown: 30,
+  currentVehicleId: 1,
+  currentVehicleRate: 12,
+  currentBookingRef: '',
+  currentBookingId: null,
+  selectedTripType: 'one_way',
+  currentPackageId: null,
+  currentPackagePrice: 0,
+  currentPackageKmLimit: 0,
+  currentPackageHours: 0,
+  currentNavigationUrl: '',
+  currentFare: null,
+  selectedCategory: null,
+  location: 'Kittur',
+  pincode: '591115',
+  serviceArea: ['591115'],
+  currentTourId: null,
+  currentTour: null,
+  tourPersons: 1,
+  tourAddons: [],
+  tourPayment: 'upi',
+  user: { name: 'John Doe', phone: '9876543210', bookings: 12, wallet: 8500, rating: 4.6 },
+  currentLat: null,
+  currentLng: null
+};
+
+// ===================== SCREEN ROUTER =====================
+function navigateTo(screenId, vehicleId) {
+  const screens = document.querySelectorAll('.screen');
+  screens.forEach(s => s.classList.remove('active', 'exit'));
+  
+  const current = document.getElementById(App.currentScreen);
+  if (current && screenId !== App.currentScreen) {
+    current.classList.add('exit');
+  }
+  
+  const target = document.getElementById(screenId);
+  if (target) {
+    target.style.display = 'flex';
+    target.classList.add('active');
+    App.currentScreen = screenId;
+    window.scrollTo(0, 0);
+  }
+
+  const mainScreens = ['home-screen', 'bookings-screen', 'explore-screen', 'notifications-screen', 'profile-screen'];
+  const bottomNav = document.querySelector('.bottom-nav');
+  if (bottomNav) bottomNav.style.display = mainScreens.includes(screenId) ? 'flex' : 'none';
+
+  const navItems = document.querySelectorAll('.nav-item');
+  const navMap = { 'home-screen':0, 'bookings-screen':1, 'explore-screen':2, 'notifications-screen':3, 'profile-screen':4 };
+  navItems.forEach((item, i) => {
+    item.classList.toggle('active', i === navMap[screenId]);
+  });
+
+  if (screenId === 'home-screen') { loadHomeScreen(); }
+  if (screenId === 'explore-screen') { loadExploreScreen(); }
+  if (screenId === 'vehicle-detail-screen') {
+    const id = vehicleId || App.currentVehicleId || 1;
+    App.currentVehicleId = id;
+    loadVehicleDetail(id);
+  }
+  if (screenId === 'tracking-screen') { loadTrackingScreen(); }
+  if (screenId === 'bookings-screen') { loadBookingsScreen(); }
+  if (screenId === 'tour-detail-screen') { loadTourDetail(App.currentTourId); }
+  if (screenId === 'tour-booking-screen') { loadTourBooking(); }
+  if (screenId === 'notifications-screen') { loadNotificationsScreen(); }
+  if (screenId === 'booking-screen') {
+    App.bookingStep = 1;
+    App.selectedTripType = 'one_way';
+    App.currentPackageId = null;
+    App.currentPackagePrice = 0;
+    document.getElementById('booking-step-1').style.display = 'block';
+    document.getElementById('booking-step-2').style.display = 'none';
+    document.getElementById('booking-back').style.display = 'none';
+    document.getElementById('booking-next').textContent = 'Next →';
+    document.getElementById('booking-next').onclick = nextBookingStep;
+    document.getElementById('booking-next').disabled = false;
+    // Reset stepper
+    const c = document.getElementById('step2-circle');
+    const l = document.getElementById('step2-label');
+    if (c) { c.style.background = 'var(--bg-card)'; c.style.borderColor = 'var(--border)'; c.style.color = 'var(--text-muted)'; }
+    if (l) { l.style.color = 'var(--text-muted)'; l.style.fontWeight = '400'; }
+    setMinDates();
+    (async () => {
+      const vd = await apiGet('vehicles/detail', {id: App.currentVehicleId});
+      if (vd && vd.price_per_km) App.currentVehicleRate = vd.price_per_km;
+    })();
+    const firstTrip = document.querySelector('.trip-type[data-trip="one_way"]');
+    if (firstTrip) selectTripType('one_way', firstTrip);
+  }
+}
+
+// ===================== CATEGORY SELECTOR =====================
+function selectCategory(name) {
+  App.selectedCategory = name || null;
+  navigateTo('explore-screen');
+}
+
+// ===================== HOME SCREEN LOADER =====================
+async function loadHomeScreen() {
+  try {
+    const vehicles = await apiGet('vehicles/list');
+    const el = document.getElementById('popular-vehicles');
+    if (el && vehicles && vehicles.length) {
+      el.innerHTML = vehicles.slice(0, 5).map(v => `
+        <div class="v-card" style="display:flex;gap:0.75rem;padding:0.625rem;background:var(--card);border:1px solid var(--card-border);border-radius:14px;cursor:pointer;box-shadow:0 4px 14px rgba(56,189,248,0.1),0 2px 6px rgba(56,189,248,0.06);transform:translateY(0);transition:all 0.25s ease;" onclick="navigateTo('vehicle-detail-screen', ${v.id})">
+          <div style="width:90px;height:72px;border-radius:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--border-light);"><img src="${v.image || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=200&h=150&fit=crop'}" alt="${v.name}" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:700;color:var(--text);font-size:0.8125rem;">${v.name}</span><span class="badge badge-primary" style="font-size:0.5rem;padding:0.15rem 0.5rem;">${v.category_name||'Rental'}</span></div>
+          <div style="display:flex;gap:0.5rem;margin:0.25rem 0;font-size:0.5625rem;color:var(--text-secondary);"><span><i class="bi bi-person"></i> ${v.seats}</span><span><i class="bi bi-fuel-pump"></i> ${v.fuel_type||''}</span><span><i class="bi bi-gear"></i> ${v.transmission||''}</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;"><span><i class="bi bi-star-fill" style="color:var(--warning);font-size:0.5rem;"></i> ${v.rating||'4.0'} <span style="color:var(--text-muted);font-size:0.5rem;">(${v.total_bookings||0})</span></span><span class="price-dark" style="font-size:0.9375rem;">₹${v.price_per_km||0}<span style="font-size:0.5rem;font-weight:600;color:var(--text-muted);">/km</span></span></div></div>
+        </div>`).join('');
+    }
+  } catch(e) {}
+  try {
+    const tours = await apiGet('tours/list');
+    const tel = document.getElementById('home-tours');
+    if (tel) {
+      if (tours && tours.length) {
+        tel.innerHTML = '<div class="tour-carousel">' + tours.map(function(t) {
+          var img = t.image || '';
+          var spotsLeft = (t.max_participants||0) - (t.current_participants||0);
+          return '<div class="tour-carousel-card" onclick="App.currentTourId=' + t.id + ';navigateTo(\'tour-detail-screen\')">' +
+            (img ? '<img src="' + img + '" alt="' + t.title + '" loading="lazy">' : '<div style="width:100%;height:130px;background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(239,68,68,0.2));display:flex;align-items:center;justify-content:center;"><i class="bi bi-suitcase-lg-fill" style="font-size:2rem;color:var(--warning);opacity:0.6;"></i></div>') +
+            '<div class="info"><div class="title">' + t.title + '</div>' +
+            '<div class="meta"><i class="bi bi-calendar"></i> ' + (t.tour_date||'') + ' · <i class="bi bi-people"></i> ' + spotsLeft + ' left</div>' +
+            '<div class="price">₹' + (t.price_per_person||0) + '<span style="font-size:0.625rem;font-weight:600;color:#64748B;margin-left:2px;">/person</span></div></div></div>';
+        }).join('') + '</div>';
+      } else {
+        tel.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.6875rem;">No upcoming tours</div>';
+      }
+    }
+  } catch(e) {}
+  // GPS auto-fetch location
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      App.currentLat = pos.coords.latitude;
+      App.currentLng = pos.coords.longitude;
+    }, function(err) {}, {timeout:5000, enableHighAccuracy:false});
+  }
+}
+async function loadExploreScreen() {
+  try {
+    const vehicles = await apiGet('vehicles/list');
+    const el = document.getElementById('explore-vehicles');
+    if (!el) return;
+    const category = App.selectedCategory;
+    const filtered = category
+      ? vehicles.filter(v => (v.category_name || '').toLowerCase() === category.toLowerCase())
+      : vehicles || [];
+    const headerTitle = document.querySelector('#explore-screen .section-header span:first-child');
+    const resultsLabel = document.querySelector('#explore-screen .section-header span:last-child');
+    if (headerTitle) headerTitle.textContent = category ? category + ' Vehicles' : 'Available Vehicles';
+    if (resultsLabel) resultsLabel.textContent = filtered.length + ' results';
+    if (!filtered.length) {
+      el.innerHTML = '<div style="text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:0.8125rem;">No vehicles in this category yet</div>';
+      return;
+    }
+    el.innerHTML = filtered.map(v => `
+      <div class="v-card" style="display:flex;gap:0.75rem;padding:0.625rem;background:var(--card);border:1px solid var(--card-border);border-radius:14px;cursor:pointer;box-shadow:0 4px 14px rgba(56,189,248,0.1),0 2px 6px rgba(56,189,248,0.06);transform:translateY(0);transition:all 0.25s ease;" onclick="navigateTo('vehicle-detail-screen', ${v.id})">
+        <div style="width:90px;height:72px;border-radius:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--border-light);"><img src="${v.image || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=200&h=150&fit=crop'}" alt="${v.name}" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:700;color:var(--text);font-size:0.8125rem;">${v.name}</span><span class="badge badge-primary" style="font-size:0.5rem;padding:0.15rem 0.5rem;">${v.category_name||'Available'}</span></div>
+        <div style="display:flex;gap:0.5rem;margin:0.25rem 0;font-size:0.5625rem;color:var(--text-secondary);"><span><i class="bi bi-person"></i> ${v.seats}</span><span><i class="bi bi-fuel-pump"></i> ${v.fuel_type||''}</span><span><i class="bi bi-gear"></i> ${v.transmission||''}</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><span><i class="bi bi-star-fill" style="color:var(--warning);font-size:0.5rem;"></i> ${v.rating||'4.0'} <span style="color:var(--text-muted);font-size:0.5rem;">(${v.total_bookings||0})</span></span><span class="price-dark" style="font-size:0.9375rem;">₹${v.price_per_km||0}<span style="font-size:0.5rem;font-weight:600;color:#64748B;">/km</span></span></div></div>
+        </div>`).join('');
+  } catch(e) {}
+}
+
+// ===================== TRACKING SCREEN =====================
+async function loadTrackingScreen() {
+  const bid = App.currentBookingId || 0;
+  if (!bid) return;
+  try {
+    const data = await apiGet('bookings/detail', { id: bid });
+    if (!data || data.error) return;
+    const nameEl = document.getElementById('tracking-driver-name');
+    const avatarEl = document.getElementById('tracking-driver-avatar');
+    const detailEl = document.getElementById('tracking-driver-detail');
+    const distEl = document.getElementById('tracking-distance');
+    const navBtn = document.getElementById('tracking-navigate-btn');
+
+    if (data.driver_assigned && data.driver_name) {
+      if (nameEl) nameEl.textContent = data.driver_name;
+      if (avatarEl) avatarEl.textContent = data.driver_name.charAt(0).toUpperCase();
+      if (detailEl) detailEl.textContent = (data.driver_vehicle || 'Vehicle');
+      document.getElementById('otp-display').style.display = 'block';
+    } else {
+      if (nameEl) nameEl.textContent = 'Assigning driver...';
+      if (avatarEl) avatarEl.textContent = '?';
+      if (detailEl) detailEl.textContent = 'Admin will assign a driver shortly';
+      document.getElementById('otp-display').style.display = 'none';
+    }
+    if (distEl && data.distance_km) distEl.textContent = data.distance_km + ' km';
+    if (navBtn && data.navigation_url) {
+      navBtn.style.display = 'block';
+      navBtn.onclick = () => window.open(data.navigation_url, '_blank');
+    }
+  } catch(e) {}
+}
+
+// ===================== BOOKINGS SCREEN =====================
+async function loadBookingsScreen(filter) {
+  try {
+    const statusMap = { completed: 'completed', cancelled: 'cancelled' };
+    const params = filter && statusMap[filter] ? { status: statusMap[filter] } : {};
+    const bookings = await apiGet('bookings/list', params);
+    const container = document.getElementById('bookings-list');
+    if (!container) return;
+    if (!bookings || bookings.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:0.8125rem;">No bookings yet</div>';
+      return;
+    }
+    container.innerHTML = bookings.map(b => {
+      const statusColor = {pending:'warning', confirmed:'info', ongoing:'info', completed:'success', cancelled:'danger'}[b.status] || 'info';
+      return `
+        <div class="booking-card" style="padding:1rem;background:var(--card);border:1px solid var(--border);border-radius:20px;margin-bottom:0.75rem;box-shadow:0 2px 8px rgba(56,189,248,0.06);" onclick="navigateTo('tracking-screen')">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.5rem;">
+            <span style="font-weight:700;color:var(--text);font-size:0.9375rem;">${b.vehicle_name || 'Vehicle'}</span>
+            <span class="badge badge-${statusColor}" style="font-size:0.625rem;">${b.status}</span>
+          </div>
+          <p style="font-size:0.8125rem;color:var(--text-muted);margin:0;">${b.pickup_location || ''} → ${b.drop_location || ''}</p>
+          <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
+            ${b.status === 'confirmed' || b.status === 'ongoing' ? `<button class="btn btn-primary btn-sm" style="padding:0.375rem 0.75rem;border-radius:10px;font-size:0.75rem;" onclick="event.stopPropagation();navigateTo('tracking-screen')"><i class="bi bi-geo-alt"></i> Track</button>` : ''}
+            <span class="price-dark" style="font-size:0.8125rem;margin-left:auto;">₹${b.total_fare||0}</span>
+            ${b.status === 'pending' ? `<span style="font-size:0.6875rem;color:var(--text-muted);">Awaiting admin assignment</span>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    const container = document.getElementById('bookings-list');
+    if (container) container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Failed to load bookings</div>';
+  }
+}
+
+// ===================== INIT / SPLASH =====================
+document.addEventListener('DOMContentLoaded', function() {
+  var loggedIn = localStorage.getItem('tripany-user');
+  if (loggedIn) {
+    try { App.user = JSON.parse(loggedIn); } catch(e) { localStorage.removeItem('tripany-user'); }
+  }
+  App.theme = localStorage.getItem('tripany-theme') || 'light';
+  App.location = localStorage.getItem('tripany-location') || 'Kittur';
+  App.pincode = localStorage.getItem('tripany-pincode') || '591115';
+  document.documentElement.setAttribute('data-theme', App.theme);
+  var themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) themeToggle.checked = App.theme === 'dark';
+  var locEl = document.getElementById('home-location-name');
+  if (locEl) locEl.textContent = App.location + ', ' + App.pincode;
+
+  var bar = document.getElementById('splash-progress');
+  if (bar) setTimeout(function() { bar.style.width = '100%'; }, 100);
+
+  var splashBtn = document.getElementById('splash-screen');
+  if (splashBtn) splashBtn.addEventListener('click', function() { hideSplash(loggedIn); });
+  setTimeout(function() { hideSplash(loggedIn); }, 2800);
+});
+
+function hideSplash(loggedIn) {
+  var s = document.getElementById('splash-screen');
+  if (!s || s.dataset.done) return;
+  s.dataset.done = '1';
+  s.style.transition = 'opacity 0.4s ease';
+  s.style.opacity = '0';
+  s.style.pointerEvents = 'none';
+  setTimeout(function() { s.style.display = 'none'; }, 450);
+  if (loggedIn) {
+    navigateTo('home-screen');
+    var bn = document.querySelector('.bottom-nav');
+    if (bn) bn.style.display = 'flex';
+  } else {
+    navigateTo('login-screen');
+  }
+}
+
+// ===================== QUICK LOGIN BYPASS =====================
+function quickLogin() {
+  App.user = { id: 2, name: 'John Doe', phone: '9876543210', bookings: 12, wallet: 8500, rating: 4.6 };
+  localStorage.setItem('tripany-user', JSON.stringify(App.user));
+  showToast('Logged in as John Doe', 'success');
+  navigateTo('home-screen');
+}
+
+// ===================== LOGIN / OTP =====================
+async function requestOTP() {
+  const input = document.getElementById('phone-input');
+  const phone = input ? input.value : '';
+  if (phone.length < 10) { showToast('Please enter a valid 10-digit number', 'error'); return; }
+  App.phoneNumber = phone;
+  try {
+    const res = await apiPost('auth/login', { phone });
+    if (res.success) {
+      document.getElementById('otp-phone').textContent = phone;
+      if (res.otp) {
+        const digits = res.otp.split('');
+        setTimeout(() => {
+          document.querySelectorAll('.otp-input').forEach((el, i) => {
+            if (digits[i]) el.value = digits[i];
+            if (i < 5 && digits[i]) document.querySelectorAll('.otp-input')[i + 1].focus();
+          });
+        }, 300);
+      }
+      navigateTo('otp-screen');
+      startOTPTimer();
+      document.querySelectorAll('.otp-input')[0].focus();
+    } else {
+      showToast('Failed to send OTP', 'error');
+    }
+  } catch (e) {
+    showToast('Network error', 'error');
+  }
+}
+
+const otpInputs = document.querySelectorAll('.otp-input');
+otpInputs.forEach((input, idx) => {
+  input.addEventListener('input', function() {
+    if (this.value.length === 1 && idx < 5) otpInputs[idx + 1].focus();
+  });
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Backspace' && !this.value && idx > 0) otpInputs[idx - 1].focus();
+  });
+  input.addEventListener('focus', function() { this.select(); });
+});
+
+function startOTPTimer() {
+  let time = 30;
+  const timer = document.getElementById('otp-countdown');
+  const resend = document.getElementById('otp-resend');
+  const timerDiv = document.getElementById('otp-timer');
+  if (!timer) return;
+  const interval = setInterval(() => {
+    time--;
+    timer.textContent = time + 's';
+    if (time <= 0) {
+      clearInterval(interval);
+      if (timerDiv) timerDiv.style.display = 'none';
+      if (resend) resend.style.display = 'block';
+    }
+  }, 1000);
+}
+
+function resendOTP() {
+  const resend = document.getElementById('otp-resend');
+  const timerDiv = document.getElementById('otp-timer');
+  if (resend) resend.style.display = 'none';
+  if (timerDiv) timerDiv.style.display = 'block';
+  startOTPTimer();
+  showToast('OTP resent successfully', 'success');
+}
+
+async function verifyOTP() {
+  const otp = Array.from(document.querySelectorAll('.otp-input')).map(i => i.value).join('');
+  if (otp.length < 6) { showToast('Please enter complete OTP', 'error'); return; }
+  try {
+    const res = await apiPost('auth/verify', { phone: App.phoneNumber, otp });
+    if (res.success) {
+      App.user = res.user;
+      localStorage.setItem('tripany-user', JSON.stringify(res.user));
+      showToast('Welcome to TripAny!', 'success');
+      navigateTo('home-screen');
+    } else {
+      showToast('Invalid OTP', 'error');
+    }
+  } catch (e) {
+    showToast('Verification failed', 'error');
+  }
+}
+
+// ===================== BOOKING FLOW =====================
+function nextBookingStep() {
+  if (App.bookingStep < App.maxBookingSteps) {
+    document.getElementById('booking-step-' + App.bookingStep).style.display = 'none';
+    App.bookingStep++;
+    document.getElementById('booking-step-' + App.bookingStep).style.display = 'block';
+    document.getElementById('booking-back').style.display = 'block';
+    if (App.bookingStep === 2) {
+      calculateFare();
+      document.getElementById('booking-next').textContent = 'Confirm Booking 🎉';
+      document.getElementById('booking-next').onclick = confirmBooking;
+      // Update stepper
+      const c = document.getElementById('step2-circle');
+      const l = document.getElementById('step2-label');
+      if (c) { c.style.background = 'var(--primary)'; c.style.borderColor = 'var(--primary)'; c.style.color = 'white'; }
+      if (l) { l.style.color = 'var(--primary)'; l.style.fontWeight = '600'; }
+    }
+  }
+}
+
+function prevBookingStep() {
+  if (App.bookingStep > 1) {
+    document.getElementById('booking-step-' + App.bookingStep).style.display = 'none';
+    App.bookingStep--;
+    document.getElementById('booking-step-' + App.bookingStep).style.display = 'block';
+    if (App.bookingStep === 1) document.getElementById('booking-back').style.display = 'none';
+    document.getElementById('booking-next').textContent = 'Next →';
+    document.getElementById('booking-next').onclick = nextBookingStep;
+    // Reset stepper
+    const c = document.getElementById('step2-circle');
+    const l = document.getElementById('step2-label');
+    if (c) { c.style.background = 'var(--bg-card)'; c.style.borderColor = 'var(--border)'; c.style.color = 'var(--text-muted)'; }
+    if (l) { l.style.color = 'var(--text-muted)'; l.style.fontWeight = '400'; }
+  }
+}
+
+document.getElementById('booking-back').addEventListener('click', prevBookingStep);
+
+async function confirmBooking() {
+  const btn = document.getElementById('booking-next');
+  btn.disabled = true;
+  btn.textContent = 'Booking...';
+  try {
+    const vehicleId = App.currentVehicleId || 1;
+    const tripType = App.selectedTripType || 'one_way';
+    const pickup = document.getElementById('booking-pickup')?.value || '';
+    const drop = document.getElementById('booking-drop')?.value || '';
+    const pickupLat = document.getElementById('booking-pickup-lat')?.value || '';
+    const pickupLng = document.getElementById('booking-pickup-lng')?.value || '';
+    const dropLat = document.getElementById('booking-drop-lat')?.value || '';
+    const dropLng = document.getElementById('booking-drop-lng')?.value || '';
+    const pickupCity = document.getElementById('booking-pickup-city')?.value || '';
+    const dropCity = document.getElementById('booking-drop-city')?.value || '';
+    const pickup_date = document.getElementById('booking-date')?.value || '';
+    const pickup_time = document.getElementById('booking-time')?.value || '09:00';
+    let return_date = '', return_time = '';
+    if (tripType === 'round_trip') {
+      return_date = document.getElementById('booking-return-date')?.value || '';
+      return_time = document.getElementById('booking-return-time')?.value || '';
+    }
+    const notes = document.getElementById('booking-notes')?.value || '';
+    const distText = document.getElementById('booking-distance')?.textContent || '';
+    const routeDistance = parseInt(distText.replace(/[^0-9]/g, '')) || 0;
+    const stops = [];
+    document.querySelectorAll('.stop-input').forEach(s => {
+      if (s.value.trim()) stops.push(s.value.trim());
+    });
+    const rate = App.currentVehicleRate || 12;
+    const baseFare = tripType === 'hourly' ? App.currentPackagePrice || 0 : Math.max(350, routeDistance * rate);
+    let extraKmCharge = 0;
+    if (tripType === 'hourly' && App.currentPackageId && routeDistance > (App.currentPackageKmLimit || 0)) {
+      extraKmCharge = (routeDistance - App.currentPackageKmLimit) * rate;
+    }
+    const subtotal = baseFare + extraKmCharge;
+    const tax = subtotal * 0.05;
+    const total = subtotal + tax;
+    const body = {
+      vehicle_id: vehicleId, trip_type: tripType,
+      pickup_location: pickup, drop_location: drop,
+      pickup_lat: pickupLat || null, pickup_lng: pickupLng || null,
+      drop_lat: dropLat || null, drop_lng: dropLng || null,
+      pickup_city: pickupCity, drop_city: dropCity,
+      pickup_date: pickup_date, pickup_time: pickup_time,
+      return_date: return_date, return_time: return_time,
+      distance_km: routeDistance, base_fare: baseFare, tax: tax, total_fare: total,
+      stops: JSON.stringify(stops), booking_notes: notes, pricing_type: tripType === 'hourly' ? 'hourly' : 'per_km'
+    };
+    if (tripType === 'hourly') {
+      body.package_id = App.currentPackageId;
+      body.extra_km_charge = extraKmCharge;
+    }
+    const res = await fetch('/api/index.php?action=bookings/create', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.success) {
+      App.currentBookingRef = data.booking_ref;
+      App.currentBookingId = data.booking_id;
+      if (data.navigation_url) App.currentNavigationUrl = data.navigation_url;
+      showToast('Booking Confirmed! 🎉', 'success');
+      setTimeout(() => navigateTo('tracking-screen'), 1000);
+    } else {
+      showToast('Booking failed: ' + (data.error || 'Unknown error'), 'error');
+      btn.disabled = false;
+      btn.textContent = 'Confirm Booking 🎉';
+    }
+  } catch (e) {
+    showToast('Network error. Please try again.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Confirm Booking 🎉';
+  }
+}
+
+// ===================== THEME =====================
+function toggleTheme() {
+  App.theme = App.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', App.theme);
+  localStorage.setItem('tripany-theme', App.theme);
+}
+
+// ===================== TOAST =====================
+function showToast(msg, type) {
+  const existing = document.querySelector('.toast-notification');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.className = 'toast-notification';
+  toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:9999;padding:0.75rem 1.25rem;border-radius:16px;font-size:0.875rem;font-weight:600;max-width:400px;width:calc(100% - 2rem);text-align:center;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,0.3);animation:fadeInDown 0.3s ease;';
+  if (type === 'success') { toast.style.background = 'rgba(34,197,94,0.9)'; toast.style.color = 'white'; }
+  else if (type === 'error') { toast.style.background = 'rgba(239,68,68,0.9)'; toast.style.color = 'white'; }
+  else { toast.style.background = 'rgba(56,189,248,0.9)'; toast.style.color = 'white'; }
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 400); }, 3000);
+}
+
+// ===================== FILTER BOOKINGS =====================
+function filterBookings(filter, btn) {
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  loadBookingsScreen(filter);
+}
+
+// ===================== FAV TOGGLE =====================
+document.addEventListener('click', function(e) {
+  if (e.target.closest('#fav-btn')) {
+    const icon = e.target.closest('#fav-btn').querySelector('i');
+    if (icon) {
+      icon.classList.toggle('bi-heart-fill');
+      icon.classList.toggle('bi-heart');
+    }
+  }
+});
+
+// ===================== TRIP TYPE SELECTOR =====================
+function selectTripType(type, btn) {
+  App.selectedTripType = type;
+  document.querySelectorAll('.trip-type').forEach(t => {
+    t.style.borderColor = 'var(--border)';
+    t.style.background = 'var(--bg-card)';
+    t.style.color = 'var(--text-muted)';
+  });
+  btn.style.borderColor = 'var(--primary)';
+  btn.style.background = 'rgba(56,189,248,0.1)';
+  btn.style.color = 'var(--primary)';
+  // Show/hide sections
+  document.getElementById('step2-city-section').style.display = (type === 'hourly') ? 'none' : 'block';
+  document.getElementById('step2-return-section').style.display = (type === 'round_trip') ? 'block' : 'none';
+  document.getElementById('step2-hourly-section').style.display = (type === 'hourly') ? 'block' : 'none';
+  document.getElementById('step2-stops-section').style.display = (type === 'hourly') ? 'none' : 'block';
+  if (type === 'hourly') loadHourlyPackages();
+  setMinDates();
+}
+
+function setMinDates() {
+  const today = new Date().toISOString().split('T')[0];
+  const d = document.getElementById('booking-date');
+  const rd = document.getElementById('booking-return-date');
+  if (d) { d.setAttribute('min', today); if (!d.value) d.value = today; }
+  if (rd) { rd.setAttribute('min', today); if (!rd.value) rd.value = today; }
+}
+
+// ===================== STOPS =====================
+let stopCount = 0;
+function addStop() {
+  stopCount++;
+  const c = document.getElementById('stops-container');
+  const d = document.createElement('div');
+  d.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:0.5rem;';
+  d.innerHTML = `<input type="text" class="stop-input form-input" style="flex:1;padding:0.75rem 1rem;border-radius:14px;" placeholder="Stop ${stopCount}"><button onclick="this.parentElement.remove()" style="padding:0.75rem;border-radius:14px;border:1px solid var(--danger);background:rgba(239,68,68,0.1);color:var(--danger);cursor:pointer;"><i class="bi bi-x"></i></button>`;
+  c.appendChild(d);
+}
+
+// ===================== HOURLY PACKAGES =====================
+async function loadHourlyPackages() {
+  const el = document.getElementById('hourly-packages');
+  if (!el) return;
+  el.innerHTML = '<span style="font-size:0.8125rem;color:var(--text-muted);">Loading...</span>';
+  try {
+    const data = await apiGet('vehicles/detail', {id: App.currentVehicleId});
+    const pkgs = data.packages || [];
+    if (!pkgs.length) { el.innerHTML = '<span style="font-size:0.8125rem;color:var(--text-muted);">No hourly packages available</span>'; return; }
+    el.innerHTML = pkgs.map(p => `
+      <label style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:var(--bg-card);border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.2s;" onclick="selectHourlyPackage(${p.id},'${p.name}',${p.price},${p.km_limit},${p.hours})">
+        <input type="radio" name="hourly-pkg" value="${p.id}" style="accent-color:var(--primary);">
+        <div style="flex:1;"><div style="font-weight:700;font-size:0.75rem;color:var(--text);">${p.name}</div><div style="font-size:0.625rem;color:var(--text-muted);">${p.hours}h · ${p.km_limit}km</div></div>
+        <span class="price-dark" style="font-size:1rem;">₹${p.price}</span>
+      </label>`).join('');
+  } catch(e) {
+    el.innerHTML = '<span style="font-size:0.8125rem;color:var(--text-muted);">Failed to load packages</span>';
+  }
+}
+
+function selectHourlyPackage(id, name, price, kmLimit, hours) {
+  App.currentPackageId = id;
+  App.currentPackagePrice = price;
+  App.currentPackageKmLimit = kmLimit;
+  App.currentPackageHours = hours;
+  const labels = document.querySelectorAll('#hourly-packages label');
+  labels.forEach(l => l.style.borderColor = 'var(--border)');
+  if (event && event.currentTarget) event.currentTarget.style.borderColor = 'var(--primary)';
+  calculateFare();
+}
+
+// ===================== FARE CALC =====================
+async function calculateFare() {
+  const tripType = App.selectedTripType || 'one_way';
+  const distText = document.getElementById('booking-distance')?.textContent || '';
+  const distance = parseInt(distText.replace(/[^0-9]/g, '')) || 0;
+  const rate = App.currentVehicleRate || 12;
+  let baseFare = 0, extraKmCharge = 0;
+  if (tripType === 'hourly' && App.currentPackagePrice) {
+    baseFare = App.currentPackagePrice;
+    const kmLimit = App.currentPackageKmLimit || 0;
+    if (distance > kmLimit) extraKmCharge = (distance - kmLimit) * rate;
+    document.getElementById('fare-extra-row').style.display = extraKmCharge > 0 ? 'flex' : 'none';
+    document.getElementById('fare-extra').innerHTML = '<span class="price-dark">₹' + extraKmCharge + '</span>';
+  } else {
+    baseFare = Math.max(350, distance * rate);
+    document.getElementById('fare-extra-row').style.display = 'none';
+  }
+  const subtotal = baseFare + extraKmCharge;
+  const tax = Math.round(subtotal * 0.05);
+  const total = subtotal + tax;
+  document.getElementById('fare-trip-type').textContent = tripType === 'one_way' ? 'One Way' : tripType === 'round_trip' ? 'Round Trip' : 'Hourly';
+  document.getElementById('fare-distance').textContent = distance + ' km';
+  document.getElementById('fare-base').innerHTML = '<span class="price-dark">₹' + baseFare + '</span>';
+  document.getElementById('fare-tax').innerHTML = '<span class="price-dark">₹' + tax + '</span>';
+  document.getElementById('fare-total').innerHTML = '<span class="price-dark" style="font-size:1.125rem;">₹' + total + '</span>';
+  App.currentFare = {baseFare, tax, total, extraKmCharge, distance, rate};
+}
+
+// ===================== COUPON =====================
+function applyCoupon() {
+  const input = document.getElementById('coupon-input');
+  const msg = document.getElementById('coupon-msg');
+  const code = input ? input.value.trim().toUpperCase() : '';
+  if (!code) { msg.style.display = 'block'; msg.style.color = 'var(--danger)'; msg.textContent = 'Please enter a coupon code'; return; }
+  // Simple demo coupons
+  const coupons = { 'TRIP50': 50, 'TRIP100': 100, 'SAVE10': 0.1 };
+  if (coupons[code] !== undefined) {
+    msg.style.display = 'block'; msg.style.color = 'var(--success)'; msg.textContent = 'Coupon applied! You saved ₹' + coupons[code];
+    showToast('Coupon applied!', 'success');
+  } else {
+    msg.style.display = 'block'; msg.style.color = 'var(--danger)'; msg.textContent = 'Invalid coupon code';
+  }
+}
+
+// ===================== TRACKING =====================
+function openNavigation() {
+  if (App.currentNavigationUrl) {
+    window.open(App.currentNavigationUrl, '_blank');
+  } else {
+    showToast('Navigation link not available', 'error');
+  }
+}
+
+function shareNavigationLink() {
+  if (App.currentNavigationUrl) {
+    if (navigator.share) {
+      navigator.share({ title: 'TripAny Trip', text: 'Track my trip live!', url: App.currentNavigationUrl });
+    } else {
+      navigator.clipboard.writeText(App.currentNavigationUrl);
+      showToast('Link copied!', 'success');
+    }
+  } else {
+    showToast('Navigation link not available yet', 'error');
+  }
+}
+
+// ===================== HORIZONTAL SCROLL =====================
+document.querySelectorAll('.scroll-x').forEach(el => {
+  let isDown = false, startX, scrollLeft;
+  el.addEventListener('mousedown', e => { isDown = true; startX = e.pageX - el.offsetLeft; scrollLeft = el.scrollLeft; });
+  el.addEventListener('mouseleave', () => isDown = false);
+  el.addEventListener('mouseup', () => isDown = false);
+  el.addEventListener('mousemove', e => { if (!isDown) return; e.preventDefault(); el.scrollLeft = (e.pageX - el.offsetLeft - startX) * 0.5; });
+});
+
+// ===================== SOS EMERGENCY =====================
+function sendSOS() {
+  if (!confirm('🚨 Send emergency alert to TripAny admin?')) return;
+  fetch('/api/index.php?action=sos/create', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      booking_id: App.currentBookingId || null,
+      alert_type: 'emergency',
+      message: 'SOS from customer app - Need immediate assistance!'
+    })
+  }).then(r => r.json()).then(d => {
+    if (d.success) showToast('SOS sent! Admin will contact you shortly.', 'success');
+    else showToast('Failed to send SOS', 'error');
+  }).catch(() => showToast('Network error', 'error'));
+}
+
+// ===================== API HELPERS =====================
+async function apiGet(action, params = {}) {
+  const qs = new URLSearchParams(params).toString();
+  const res = await fetch(`/api/index.php?action=${action}&${qs}`);
+  return res.json();
+}
+
+async function apiPost(action, data = {}) {
+  const res = await fetch('/api/index.php?action=' + action, {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
+  });
+  return res.json();
+}
+
+// ===================== GOOGLE MAPS =====================
+let mapPicker, pickupMarker, dropMarker, pickupAutocomplete, dropAutocomplete;
+
+function initMaps() {
+  const defaultCenter = { lat: 28.6139, lng: 77.2090 };
+  const mapEl = document.getElementById('map-picker');
+  if (mapEl) {
+    mapPicker = new google.maps.Map(mapEl, {
+      center: defaultCenter, zoom: 11,
+      styles: [{ featureType: 'all', elementType: 'all', stylers: [{ saturation: -100 }, { lightness: -20 }] },
+        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0F172A' }] },
+        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1E293B' }] },
+        { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }],
+      mapTypeControl: false, fullscreenControl: false, streetViewControl: false
+    });
+    mapPicker.addListener('click', function(e) {
+      if (!App._placingDrop) {
+        placePickupMarker(e.latLng);
+      } else {
+        placeDropMarker(e.latLng);
+      }
+    });
+  }
+  initAutocomplete();
+}
+
+function placePickupMarker(latLng) {
+  if (pickupMarker) pickupMarker.setMap(null);
+  pickupMarker = new google.maps.Marker({ position: latLng, map: mapPicker, icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: '#22C55E', fillOpacity: 1, strokeWeight: 2, strokeColor: '#fff' }, title: 'Pickup' });
+  document.getElementById('booking-pickup-lat').value = latLng.lat();
+  document.getElementById('booking-pickup-lng').value = latLng.lng();
+  new google.maps.Geocoder().geocode({ location: latLng }, function(results, status) {
+    if (status === 'OK' && results[0]) {
+      document.getElementById('booking-pickup').value = results[0].formatted_address;
+    }
+  });
+}
+
+function placeDropMarker(latLng) {
+  if (dropMarker) dropMarker.setMap(null);
+  dropMarker = new google.maps.Marker({ position: latLng, map: mapPicker, icon: { path: google.maps.SymbolPath.SQUARE, scale: 8, fillColor: '#EF4444', fillOpacity: 1, strokeWeight: 2, strokeColor: '#fff' }, title: 'Drop' });
+  document.getElementById('booking-drop-lat').value = latLng.lat();
+  document.getElementById('booking-drop-lng').value = latLng.lng();
+  new google.maps.Geocoder().geocode({ location: latLng }, function(results, status) {
+    if (status === 'OK' && results[0]) {
+      document.getElementById('booking-drop').value = results[0].formatted_address;
+      updateDistance();
+    }
+  });
+}
+
+function initAutocomplete() {
+  const pickupInput = document.getElementById('booking-pickup');
+  const dropInput = document.getElementById('booking-drop');
+  if (pickupInput && google && google.maps && google.maps.places) {
+    pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput, { componentRestrictions: { country: 'in' } });
+    pickupAutocomplete.addListener('place_changed', function() {
+      const place = pickupAutocomplete.getPlace();
+      if (place.geometry) {
+        placePickupMarker(place.geometry.location);
+        mapPicker.setCenter(place.geometry.location);
+        if (place.geometry.viewport) mapPicker.fitBounds(place.geometry.viewport);
+        else mapPicker.setZoom(14);
+      }
+    });
+    pickupInput.addEventListener('focus', function() { App._placingDrop = false; });
+
+    dropAutocomplete = new google.maps.places.Autocomplete(dropInput, { componentRestrictions: { country: 'in' } });
+    dropAutocomplete.addListener('place_changed', function() {
+      const place = dropAutocomplete.getPlace();
+      if (place.geometry) {
+        placeDropMarker(place.geometry.location);
+        mapPicker.setCenter(place.geometry.location);
+        if (place.geometry.viewport) mapPicker.fitBounds(place.geometry.viewport);
+        else mapPicker.setZoom(14);
+        updateDistance();
+      }
+    });
+    dropInput.addEventListener('focus', function() { App._placingDrop = true; });
+  }
+}
+
+function updateDistance() {
+  const lat1 = parseFloat(document.getElementById('booking-pickup-lat').value);
+  const lng1 = parseFloat(document.getElementById('booking-pickup-lng').value);
+  const lat2 = parseFloat(document.getElementById('booking-drop-lat').value);
+  const lng2 = parseFloat(document.getElementById('booking-drop-lng').value);
+  if (lat1 && lng1 && lat2 && lng2) {
+    // Use Google Maps Directions Service for actual road distance
+    if (window.google && google.maps && google.maps.DirectionsService) {
+      const ds = new google.maps.DirectionsService();
+      ds.route({
+        origin: new google.maps.LatLng(lat1, lng1),
+        destination: new google.maps.LatLng(lat2, lng2),
+        travelMode: google.maps.TravelMode.DRIVING
+      }, (result, status) => {
+        if (status === 'OK' && result.routes[0] && result.routes[0].legs[0]) {
+          const dist = result.routes[0].legs[0].distance.value / 1000;
+          const distKm = Math.round(dist);
+          document.getElementById('booking-distance').textContent = distKm + ' km';
+          if (App.bookingStep === 2) calculateFare();
+        } else {
+          fallbackDistance(lat1, lng1, lat2, lng2);
+        }
+      });
+    } else {
+      fallbackDistance(lat1, lng1, lat2, lng2);
+    }
+  }
+}
+
+function fallbackDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const dist = Math.round(R * c);
+  document.getElementById('booking-distance').textContent = '≈ ' + dist + ' km';
+  if (App.bookingStep === 2) calculateFare();
+}
+
+// ===================== LOAD VEHICLE DETAIL =====================
+async function loadVehicleDetail(vehicleId) {
+  const data = await apiGet('vehicles/detail', {id: vehicleId});
+  if (!data || data.error) return;
+  App.currentVehicleId = data.id;
+  App.currentVehicleRate = data.price_per_km || 12;
+  const pricing = data.pricing || {};
+  const pkgs = data.packages || [];
+  const gallery = data.gallery || [];
+
+  // Hero Image
+  const heroImg = document.getElementById('vd-hero-image');
+  if (heroImg) {
+    heroImg.src = data.image || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&h=400&fit=crop';
+    heroImg.alt = data.name;
+  }
+
+  // Gallery strip
+  const galEl = document.getElementById('vd-gallery');
+  if (galEl) {
+    const allImages = [data.image, ...gallery.map(g => g.image_url)].filter(Boolean);
+    if (allImages.length > 1) {
+      galEl.innerHTML = allImages.map((url, i) =>
+        `<img src="${url}" onclick="document.getElementById('vd-hero-image').src=this.src" style="width:48px;height:34px;object-fit:cover;border-radius:6px;border:2px solid ${i===0?'var(--primary)':'var(--border)'};cursor:pointer;flex-shrink:0;" loading="lazy">`
+      ).join('');
+    }
+  }
+
+  // Header
+  const hdr = document.getElementById('vd-header');
+  if (hdr) hdr.innerHTML = `<h2 style="font-size:0.875rem;font-weight:800;color:var(--text);margin:0;letter-spacing:-0.02em;">${data.name}</h2><p style="color:var(--text-muted);font-size:0.5625rem;margin:0.0625rem 0 0;">${data.type||''} · ${data.year||''} · ${data.fuel_type||''} · ${data.brand||''}</p>`;
+
+  // Rating
+  const rtg = document.getElementById('vd-rating');
+  if (rtg) {
+    const r = parseFloat(data.rating) || 0;
+    const rb = document.getElementById('vd-badge');
+    if (rb) rb.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${data.is_active ? 'Available' : 'Unavailable'}`;
+    rtg.innerHTML = `<i class="bi bi-star-fill" style="color:var(--warning);font-size:0.625rem;"></i><span style="font-weight:700;font-size:0.75rem;color:var(--text);">${r}</span><span style="color:var(--text-muted);font-size:0.625rem;"> (${data.total_reviews||0})</span>`;
+  }
+
+  // Specs
+  const specs = document.getElementById('vd-specs');
+  if (specs) {
+    specs.innerHTML = `
+      <div style="text-align:center;padding:0.375rem;background:var(--bg-card);border-radius:8px;border:1px solid var(--border);"><i class="bi bi-person" style="color:var(--primary);font-size:0.75rem;"></i><div style="font-size:0.5rem;color:var(--text-muted);margin-top:0.0625rem;">${data.seats||0} Seats</div></div>
+      <div style="text-align:center;padding:0.375rem;background:var(--bg-card);border-radius:8px;border:1px solid var(--border);"><i class="bi bi-fuel-pump" style="color:var(--secondary);font-size:0.75rem;"></i><div style="font-size:0.5rem;color:var(--text-muted);margin-top:0.0625rem;">${data.fuel_type||'Petrol'}</div></div>
+      <div style="text-align:center;padding:0.375rem;background:var(--bg-card);border-radius:8px;border:1px solid var(--border);"><i class="bi bi-gear" style="color:var(--success);font-size:0.75rem;"></i><div style="font-size:0.5rem;color:var(--text-muted);margin-top:0.0625rem;">${data.transmission||'Manual'}</div></div>`;
+  }
+
+  // Features as inline badges
+  const featSec = document.getElementById('vd-features');
+  const featList = document.getElementById('vd-features-list');
+  if (featSec && featList && data.features) {
+    const feats = data.features.split('|').filter(f => f.trim());
+    if (feats.length) {
+      featSec.style.display = 'block';
+      featList.innerHTML = feats.map(f => `<span class="badge badge-primary" style="font-size:0.5rem;padding:0.125rem 0.375rem;">${f.trim()}</span>`).join('');
+    } else {
+      featSec.style.display = 'none';
+    }
+  }
+
+  // Compact collapsible details
+  const detailsSec = document.getElementById('vd-details-section');
+  const incSec = document.getElementById('vd-inclusions');
+  const incList = document.getElementById('vd-inclusions-list');
+  const excSec = document.getElementById('vd-exclusions');
+  const excList = document.getElementById('vd-exclusions-list');
+  const facSec = document.getElementById('vd-facilities');
+  const facList = document.getElementById('vd-facilities-list');
+  const trmSec = document.getElementById('vd-terms');
+  const trmList = document.getElementById('vd-terms-list');
+  const canSec = document.getElementById('vd-cancellation');
+  const canText = document.getElementById('vd-cancellation-text');
+  let hasDetails = false;
+
+  if (incSec && incList && data.inclusions) {
+    const items = data.inclusions.split('|').filter(f => f.trim());
+    if (items.length) { incSec.style.display = 'block'; hasDetails = true;
+      incList.innerHTML = items.map(i => `<div style="display:flex;align-items:center;gap:0.25rem;"><i class="bi bi-check-circle" style="color:var(--success);font-size:0.5rem;"></i> ${i.trim()}</div>`).join(''); }
+  }
+  if (excSec && excList && data.exclusions) {
+    const items = data.exclusions.split('|').filter(f => f.trim());
+    if (items.length) { excSec.style.display = 'block'; hasDetails = true;
+      excList.innerHTML = items.map(i => `<div style="display:flex;align-items:center;gap:0.25rem;"><i class="bi bi-x-circle" style="color:var(--danger);font-size:0.5rem;"></i> ${i.trim()}</div>`).join(''); }
+  }
+  if (facSec && facList && data.facilities) {
+    const items = data.facilities.split('|').filter(f => f.trim());
+    if (items.length) { facSec.style.display = 'block'; hasDetails = true;
+      facList.innerHTML = items.map(i => `<div style="display:flex;align-items:center;gap:0.25rem;"><i class="bi bi-check-lg" style="color:var(--primary);font-size:0.5rem;"></i> ${i.trim()}</div>`).join(''); }
+  }
+  if (trmSec && trmList && data.terms) {
+    const items = data.terms.split('|').filter(f => f.trim());
+    if (items.length) { trmSec.style.display = 'block'; hasDetails = true;
+      trmList.innerHTML = items.map(i => `<div style="display:flex;align-items:start;gap:0.25rem;"><span style="color:var(--warning);font-weight:700;">•</span> ${i.trim()}</div>`).join(''); }
+  }
+  if (canSec && canText) {
+    canSec.style.display = 'block'; hasDetails = true;
+    canText.textContent = data.cancellation_policy || 'Free cancellation within 30 minutes of booking.';
+  }
+  if (detailsSec) detailsSec.style.display = hasDetails ? 'block' : 'none';
+
+  // Pricing
+  const el = document.getElementById('vehicle-pricing');
+    if (el) {
+      let html = `<div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">Per KM</span><span class="price-dark" style="font-size:0.6875rem;">₹${data.price_per_km || 0}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">Min KM</span><span style="font-weight:600;color:var(--text);">${pricing.min_km || 300} km</span></div>
+    <div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-muted);">Base Rate</span><span class="price-dark" style="font-size:0.6875rem;">₹${pricing.base_rate || 0}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:0.375rem 0;"><span style="color:var(--text-muted);">Security Deposit</span><span class="price-dark" style="font-size:0.6875rem;">₹${pricing.security_deposit || 0}</span></div>`;
+    el.innerHTML = html;
+  }
+
+  // Outstation Packages
+  const pkgsEl = document.getElementById('vd-packages');
+  const pkgsList = document.getElementById('vd-packages-list');
+  if (pkgsEl && pkgsList && pkgs.length) {
+    pkgsEl.style.display = 'block';
+    pkgsList.innerHTML = pkgs.map(p =>
+      `<div style="display:flex;justify-content:space-between;padding:0.3rem 0;border-bottom:1px solid var(--border);">
+        <span style="color:var(--text-muted);">${p.name}</span>
+        <span style="color:var(--text-secondary);font-size:0.5rem;">${p.hours}h / ${p.km_limit}km</span>
+        <span class="price-dark" style="font-size:0.6875rem;">₹${p.price}</span>
+      </div>`
+    ).join('');
+  }
+
+  // Sticky price
+  const sticky = document.getElementById('sticky-price');
+  if (sticky) {
+    sticky.innerHTML = `<div style="font-size:0.5rem;color:var(--text-muted);">Starting from</div><div class="price-dark" style="font-size:1rem;">₹${data.price_per_km || 0}<span style="font-size:0.5rem;font-weight:600;color:#64748B;">/km</span></div>`;
+  }
+
+  // Booking screen header
+  const binfo = document.getElementById('booking-vehicle-info');
+  if (binfo) binfo.textContent = data.name + ' · ' + (data.type||'');
+
+  // Reviews
+  const rl = document.getElementById('vd-reviews-list');
+  if (rl) {
+    if (data.reviews && data.reviews.length) {
+      rl.innerHTML = data.reviews.map(r => {
+        const stars = Array(5).fill().map((_,i) => `<i class="bi bi-star-fill" style="color:var(--warning);font-size:0.5rem;${i >= (r.rating||5) ? 'opacity:0.3' : ''}"></i>`).join('');
+        const initial = (r.user_name||'U')[0];
+        return `<div style="padding:0.5rem;background:var(--bg-card);border-radius:10px;border:1px solid var(--border);"><div style="display:flex;justify-content:space-between;align-items:center;"><div style="display:flex;align-items:center;gap:0.375rem;"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#38BDF8,#7DD3FC);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.5rem;">${initial}</div><div><div style="font-size:0.625rem;font-weight:600;color:var(--text);">${r.user_name||'User'}</div><div style="font-size:0.5rem;color:var(--text-muted);">${r.created_at||''}</div></div></div><div style="display:flex;">${stars}</div></div><p style="font-size:0.625rem;color:var(--text-secondary);margin:0.25rem 0 0;">${r.comment||'Great vehicle!'}</p></div>`;
+      }).join('');
+    } else {
+      rl.innerHTML = '<div style="text-align:center;padding:0.5rem;color:var(--text-muted);font-size:0.5625rem;">No reviews yet</div>';
+    }
+  }
+
+  // Driver — show general info without rating
+  const drv = document.getElementById('vd-driver');
+  const drvInfo = document.getElementById('vd-driver-info');
+  if (drv && drvInfo) {
+    drv.style.display = 'block';
+    drvInfo.innerHTML = `<i class="bi bi-info-circle" style="color:var(--primary);font-size:0.5rem;"></i> A driver will be assigned after booking.`;
+  }
+}
+
+// ===================== LOCATION =====================
+var locations = [
+  { name: 'Kittur', pincode: '591115' },
+  { name: 'Belgaum', pincode: '590001' },
+  { name: 'Bagalkot', pincode: '587101' },
+  { name: 'Gokak', pincode: '591302' },
+  { name: 'Hukkeri', pincode: '591311' },
+  { name: 'Bailhongal', pincode: '591102' },
+  { name: 'Ramdurg', pincode: '591123' },
+  { name: 'Saundatti', pincode: '591127' }
+];
+
+function showLocationPicker() {
+  var list = document.getElementById('location-list');
+  if (!list) return;
+  var gpsItem = '<div onclick="useCurrentLocation()" style="display:flex;align-items:center;gap:0.625rem;padding:0.625rem 0.75rem;border-radius:12px;cursor:pointer;border:1px solid var(--primary);background:rgba(56,189,248,0.08);margin-bottom:0.5rem;"><i class="bi bi-crosshair" style="color:var(--primary);font-size:0.875rem;"></i><div><div style="font-size:0.8125rem;font-weight:600;color:var(--text);">Use Current Location</div><div style="font-size:0.625rem;color:var(--text-muted);">GPS auto-detect</div></div><i class="bi bi-arrow-right-circle" style="color:var(--primary);margin-left:auto;"></i></div>';
+  list.innerHTML = gpsItem + locations.map(function(l) {
+    var isActive = (l.pincode === App.pincode);
+    return '<div onclick="changeLocation(\'' + l.name + '\',\'' + l.pincode + '\')" style="display:flex;align-items:center;gap:0.625rem;padding:0.625rem 0.75rem;border-radius:12px;cursor:pointer;background:' + (isActive ? 'rgba(56,189,248,0.08)' : 'transparent') + ';border:1px solid ' + (isActive ? 'var(--primary)' : 'var(--border)') + ';"><i class="bi bi-geo-alt-fill" style="color:' + (isActive ? 'var(--primary)' : 'var(--text-muted)') + ';font-size:0.875rem;"></i><div><div style="font-size:0.8125rem;font-weight:600;color:var(--text);">' + l.name + '</div><div style="font-size:0.625rem;color:var(--text-muted);">' + l.pincode + '</div></div>' + (isActive ? '<i class="bi bi-check-circle-fill" style="color:var(--primary);margin-left:auto;"></i>' : '') + '</div>';
+  }).join('');
+  document.getElementById('location-modal').style.display = 'flex';
+}
+
+function useCurrentLocation() {
+  if (!navigator.geolocation) { showToast('GPS not available', 'error'); return; }
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    App.currentLat = pos.coords.latitude;
+    App.currentLng = pos.coords.longitude;
+    // Reverse geocode to find city
+    var latlng = pos.coords.latitude + ',' + pos.coords.longitude;
+    fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + latlng + '&key=AIzaSyBg36zNfvaFGbYsfz5FqN0yIKf5tEY3BBQ')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.results && data.results[0]) {
+          var addr = data.results[0].formatted_address;
+          var locName = App.location;
+          for (var i = 0; i < data.results[0].address_components.length; i++) {
+            var comp = data.results[0].address_components[i];
+            if (comp.types.indexOf('locality') > -1 || comp.types.indexOf('administrative_area_level_2') > -1) {
+              locName = comp.long_name; break;
+            }
+          }
+          var locEl = document.getElementById('home-location-name');
+          if (locEl) locEl.textContent = locName;
+          App.location = locName;
+          localStorage.setItem('tripany-location', locName);
+          closeLocationModal();
+          showToast('Location set to ' + locName, 'success');
+        }
+      })
+      .catch(function() { closeLocationModal(); showToast('Location detected', 'success'); });
+  }, function() { showToast('Enable GPS for auto-location', 'error'); }, {timeout:8000});
+}
+
+function closeLocationModal() {
+  document.getElementById('location-modal').style.display = 'none';
+}
+
+function changeLocation(name, pincode) {
+  App.location = name;
+  App.pincode = pincode;
+  localStorage.setItem('tripany-location', name);
+  localStorage.setItem('tripany-pincode', pincode);
+  var locEl = document.getElementById('home-location-name');
+  if (locEl) locEl.textContent = name + ', ' + pincode;
+  closeLocationModal();
+  if (App.serviceArea.indexOf(pincode) === -1) {
+    document.getElementById('coming-soon-text').textContent = 'We are working hard to serve you better in ' + name + '. Our team will be with you soon!';
+    document.getElementById('coming-soon-modal').style.display = 'flex';
+    document.getElementById('popular-vehicles').innerHTML = '<div style="text-align:center;padding:1.5rem 1rem;"><span style="font-size:2rem;">😊</span><p style="font-size:0.8125rem;color:var(--text-muted);margin:0.5rem 0 0;">We are working hard to serve you better in <strong>' + name + '</strong>. We will be with you sooner!</p></div>';
+    document.getElementById('home-tours').innerHTML = '<div style="text-align:center;padding:1.5rem 1rem;"><span style="font-size:2rem;">😊</span><p style="font-size:0.8125rem;color:var(--text-muted);margin:0.5rem 0 0;">Tour services coming soon to <strong>' + name + '</strong>!</p></div>';
+  } else {
+    loadHomeScreen();
+  }
+}
+
+function showLocationComingSoon() {
+  document.getElementById('coming-soon-modal').style.display = 'flex';
+}
+
+// ===================== TOUR DETAIL =====================
+async function loadTourDetail(tourId) {
+  if (!tourId) return;
+  try {
+    var tours = await apiGet('tours/list');
+    var t = null;
+    if (tours) t = tours.find(function(tour) { return tour.id == tourId; });
+    if (!t) return;
+    App.currentTour = t;
+    document.getElementById('tour-detail-title').textContent = t.title;
+    document.getElementById('tour-detail-dest').innerHTML = '<i class="bi bi-geo-alt-fill" style="color:var(--primary);"></i> ' + (t.destination || '');
+    document.getElementById('tour-detail-date').textContent = t.tour_date || '--';
+    document.getElementById('tour-detail-spots').textContent = ((t.max_participants || 0) - (t.current_participants || 0)) + ' left';
+    document.getElementById('tour-detail-vehicle').textContent = t.vehicle_type || 'SUV';
+    document.getElementById('tour-detail-desc').textContent = t.description || 'Experience an amazing group tour with comfortable travel, delicious food, and unforgettable memories.';
+    document.getElementById('tour-detail-price').textContent = '₹' + (t.price_per_person || 0);
+    if (t.image) {
+      document.getElementById('tour-detail-hero').innerHTML = '<img src="' + t.image + '" style="width:100%;height:100%;object-fit:cover;" alt="' + t.title + '">';
+    }
+    var includes = (t.includes || 'Breakfast,Lunch,Entry Fees,Guide').split(',');
+    var includesEl = document.getElementById('tour-detail-includes');
+    includesEl.innerHTML = includes.map(function(item) {
+      return '<div style="display:flex;align-items:center;gap:0.375rem;padding:0.375rem 0.75rem;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15);border-radius:8px;"><i class="bi bi-check-circle-fill" style="color:#22C55E;font-size:0.625rem;"></i><span style="font-size:0.6875rem;font-weight:600;color:var(--text);">' + item.trim() + '</span></div>';
+    }).join('');
+
+    var addonsEl = document.getElementById('tour-detail-addons');
+    apiGet('addons/list').then(function(addons) {
+      if (!addons || !addons.length) {
+        addons = [
+          { name: 'Water Bottle', icon: '💧', price: 20, description: 'Packaged drinking water (1L)' },
+          { name: 'Travel Kit', icon: '🧳', price: 99, description: 'Neck pillow, eye mask, ear plugs' },
+          { name: 'Bed Kit', icon: '🛏️', price: 149, description: 'Blanket, pillow, sheet set' },
+          { name: 'First Aid Kit', icon: '🩹', price: 49, description: 'Basic medical supplies' },
+          { name: 'Snack Pack', icon: '🍿', price: 75, description: 'Chips, biscuits, chocolates' },
+          { name: 'Camera Mount', icon: '📸', price: 59, description: 'GoPro/phone mount' }
+        ];
+      }
+      addonsEl.innerHTML = addons.filter(function(a) { return a.is_active || a.is_active === undefined; }).map(function(a) {
+        return '<div style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0.75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;"><span style="font-size:1.25rem;">' + (a.icon || '📦') + '</span><div style="flex:1;"><div style="font-size:0.75rem;font-weight:700;color:var(--text);">' + a.name + '</div><div style="font-size:0.625rem;color:var(--text-muted);">' + (a.description || '') + '</div></div><span class="price-dark" style="font-size:0.75rem;">+₹' + a.price + '</span></div>';
+      }).join('');
+    });
+  } catch(e) {}
+}
+
+// ===================== TOUR BOOKING =====================
+function loadTourBooking() {
+  var t = App.currentTour;
+  if (!t) return;
+  App.tourPersons = 1;
+  App.tourAddons = [];
+  document.getElementById('tb-title').textContent = t.title;
+  document.getElementById('tb-dest').textContent = t.destination || '';
+  document.getElementById('tb-date').textContent = t.tour_date || '--';
+  document.getElementById('tb-spots').textContent = ((t.max_participants || 0) - (t.current_participants || 0)) + ' spots left';
+  document.getElementById('tour-persons').textContent = '1';
+  document.getElementById('tb-base-price').textContent = '₹' + (t.price_per_person || 0);
+  apiGet('addons/list').then(function(addons) {
+    if (!addons || !addons.length) {
+      addons = [
+        { name: 'Water Bottle', icon: '💧', price: 20, is_active: 1 },
+        { name: 'Travel Kit', icon: '🧳', price: 99, is_active: 1 },
+        { name: 'Bed Kit', icon: '🛏️', price: 149, is_active: 1 },
+        { name: 'First Aid Kit', icon: '🩹', price: 49, is_active: 1 },
+        { name: 'Snack Pack', icon: '🍿', price: 75, is_active: 1 },
+        { name: 'Camera Mount', icon: '📸', price: 59, is_active: 1 }
+      ];
+    }
+    var activeAddons = addons.filter(function(a) { return a.is_active || a.is_active === undefined; });
+    document.getElementById('tb-addons-list').innerHTML = activeAddons.map(function(a) {
+      return '<label style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;"><input type="checkbox" onchange="toggleAddon(\'' + a.name + '\',' + a.price + ',this.checked)" style="width:16px;height:16px;accent-color:var(--primary);"><span style="font-size:1rem;">' + (a.icon || '📦') + '</span><div style="flex:1;"><div style="font-size:0.75rem;font-weight:600;color:var(--text);">' + a.name + '</div></div><span class="price-dark" style="font-size:0.75rem;">+₹' + a.price + '</span></label>';
+    }).join('');
+  });
+  updateTourTotal();
+}
+
+function toggleAddon(name, price, checked) {
+  if (checked) {
+    App.tourAddons.push({ name: name, price: price });
+  } else {
+    App.tourAddons = App.tourAddons.filter(function(a) { return a.name !== name; });
+  }
+  updateTourTotal();
+}
+
+function updateTourPersons(delta) {
+  App.tourPersons = Math.max(1, Math.min(30, App.tourPersons + delta));
+  document.getElementById('tour-persons').textContent = App.tourPersons;
+  updateTourTotal();
+}
+
+function updateTourTotal() {
+  var t = App.currentTour;
+  if (!t) return;
+  var base = (t.price_per_person || 0) * App.tourPersons;
+  var addonsTotal = App.tourAddons.reduce(function(sum, a) { return sum + a.price * App.tourPersons; }, 0);
+  var total = base + addonsTotal;
+  var advance = Math.round(total * 0.25);
+  document.getElementById('tb-persons-label').textContent = App.tourPersons;
+  document.getElementById('tb-subtotal').textContent = '₹' + base;
+  var addonsRow = document.getElementById('tb-addons-row');
+  if (addonsTotal > 0) {
+    addonsRow.style.display = 'flex';
+    document.getElementById('tb-addons-total').textContent = '₹' + addonsTotal;
+  } else {
+    addonsRow.style.display = 'none';
+  }
+  document.getElementById('tb-total').textContent = '₹' + total;
+  document.getElementById('tb-advance').textContent = advance;
+  document.getElementById('tb-pay-amount').textContent = advance;
+}
+
+function selectTourPayment(method, el) {
+  App.tourPayment = method;
+  document.querySelectorAll('.tour-payment-option').forEach(function(opt) {
+    opt.style.borderColor = 'var(--border)';
+    opt.style.background = 'transparent';
+    opt.classList.remove('active');
+  });
+  el.style.borderColor = 'var(--primary)';
+  el.style.background = 'rgba(56,189,248,0.06)';
+  el.classList.add('active');
+}
+
+async function confirmTourBooking() {
+  var t = App.currentTour;
+  if (!t) { showToast('Please select a tour', 'error'); return; }
+  var total = (t.price_per_person || 0) * App.tourPersons + App.tourAddons.reduce(function(s, a) { return s + a.price * App.tourPersons; }, 0);
+  var advance = Math.round(total * 0.25);
+  try {
+    var res = await apiPost('tours/book', { tour_id: t.id, persons: App.tourPersons });
+    if (res && res.success) {
+      showToast('Tour booked! Advance: ₹' + advance + ' paid', 'success');
+      navigateTo('home-screen');
+    } else {
+      showToast(res.error || 'Booking failed', 'error');
+    }
+  } catch(e) {
+    showToast('Network error', 'error');
+  }
+}
+
+// ===================== NOTIFICATIONS SCREEN =====================
+async function loadNotificationsScreen() {
+  var container = document.getElementById('notifications-list');
+  if (!container) return;
+  try {
+    var notifs = await apiGet('notifications/list');
+    if (!notifs || !notifs.length) {
+      container.innerHTML = '<div style="text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:0.8125rem;">No notifications yet</div>';
+      return;
+    }
+    var iconMap = { 'booking': '<i class="bi bi-calendar-check" style="color:var(--primary);font-size:0.75rem;"></i>', 'success': '<i class="bi bi-check-circle" style="color:var(--success);font-size:0.75rem;"></i>', 'info': '<i class="bi bi-info-circle" style="color:var(--primary);font-size:0.75rem;"></i>', 'warning': '<i class="bi bi-exclamation-triangle" style="color:var(--warning);font-size:0.75rem;"></i>' };
+    var bgMap = { 'booking': 'rgba(56,189,248,0.12)', 'success': 'rgba(34,197,94,0.12)', 'info': 'rgba(56,189,248,0.12)', 'warning': 'rgba(245,158,11,0.12)' };
+    container.innerHTML = notifs.map(function(n) {
+      var iconHtml = iconMap[n.type] || iconMap['info'];
+      var bg = bgMap[n.type] || bgMap['info'];
+      var isUnread = n.is_read == 0;
+      var timeAgo = n.created_at ? timeAgoStr(n.created_at) : '';
+      return '<div style="display:flex;gap:0.5rem;padding:0.75rem;background:' + (isUnread ? 'rgba(56,189,248,0.03)' : 'var(--bg-card)') + ';border:1px solid var(--border);border-radius:12px;position:relative;">' +
+        '<div style="width:32px;height:32px;border-radius:8px;background:' + bg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + iconHtml + '</div>' +
+        '<div style="flex:1;min-width:0;"><div style="font-size:0.75rem;font-weight:700;color:var(--text);">' + (n.title||'') + '</div>' +
+        '<div style="font-size:0.625rem;color:var(--text-muted);">' + (n.message||'') + '</div>' +
+        '<div style="font-size:0.5625rem;color:var(--text-muted);margin-top:0.125rem;">' + timeAgo + '</div></div>' +
+        (isUnread ? '<span style="width:6px;height:6px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:6px;"></span>' : '') + '</div>';
+    }).join('');
+  } catch(e) {
+    container.innerHTML = '<div style="text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:0.8125rem;">Failed to load notifications</div>';
+  }
+}
+
+function timeAgoStr(dt) {
+  var d = new Date(dt.replace(' ', 'T') + 'Z');
+  var now = new Date();
+  var diff = Math.floor((now - d) / 1000);
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return Math.floor(diff/86400) + 'd ago';
+}
+
+// ===================== NOTIFICATIONS POLLING =====================
+var lastNotifId = 0;
+var notifQueue = [];
+var notifTimeout = null;
+
+async function pollNotifications() {
+  if (!App.user || !App.user.id) return;
+  try {
+    var notifs = await apiGet('notifications/list');
+    if (notifs && notifs.length) {
+      // Update badge
+      var unread = notifs.filter(function(n) { return n.is_read == 0; });
+      var badge = document.getElementById('notif-badge');
+      if (badge) {
+        if (unread.length > 0) {
+          badge.style.display = 'flex';
+          badge.textContent = unread.length > 9 ? '9+' : unread.length;
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+      // Update home badge
+      var homeBadge = document.getElementById('home-notif-badge');
+      var homeDot = document.getElementById('home-notif-dot');
+      if (homeBadge && homeDot) {
+        if (unread.length > 0) {
+          homeDot.style.display = 'none';
+          homeBadge.style.display = 'flex';
+          homeBadge.textContent = unread.length > 9 ? '9+' : unread.length;
+        } else {
+          homeDot.style.display = 'block';
+          homeBadge.style.display = 'none';
+        }
+      }
+      // Show popup for new unread notifications
+      notifs.forEach(function(n) {
+        if (n.id > lastNotifId && n.is_read == 0) {
+          notifQueue.push(n);
+        }
+      });
+      if (notifQueue.length > 0 && !document.getElementById('notif-popup').dataset.showing) {
+        showNextNotification();
+      }
+      if (notifs.length > 0) lastNotifId = Math.max.apply(Math, notifs.map(function(n) { return n.id; }));
+    }
+  } catch(e) {}
+}
+
+function showNextNotification() {
+  if (notifQueue.length === 0) return;
+  var n = notifQueue.shift();
+  var popup = document.getElementById('notif-popup');
+  var icon = document.getElementById('notif-icon');
+  var title = document.getElementById('notif-title');
+  var msg = document.getElementById('notif-msg');
+  if (!popup || !title || !msg) return;
+  var iconMap = { 'booking': '📋', 'success': '✅', 'info': 'ℹ️', 'warning': '⚠️' };
+  var colorMap = { 'booking': 'booking', 'success': 'success', 'info': 'info', 'warning': 'warning' };
+  icon.innerHTML = iconMap[n.type] || 'ℹ️';
+  icon.className = 'notif-icon ' + (colorMap[n.type] || 'info');
+  title.textContent = n.title || 'Notification';
+  msg.textContent = n.message || '';
+  popup.dataset.showing = '1';
+  popup.dataset.notifId = n.id;
+  popup.style.display = 'block';
+  // Auto-dismiss after 8 seconds
+  if (notifTimeout) clearTimeout(notifTimeout);
+  notifTimeout = setTimeout(function() {
+    dismissNotification();
+    if (notifQueue.length > 0) showNextNotification();
+  }, 8000);
+}
+
+function dismissNotification() {
+  var popup = document.getElementById('notif-popup');
+  if (!popup) return;
+  var nid = popup.dataset.notifId;
+  popup.style.display = 'none';
+  popup.dataset.showing = '';
+  if (notifTimeout) clearTimeout(notifTimeout);
+  // Mark as read
+  if (nid) {
+    fetch('/api/index.php?action=notifications/mark_read', {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id: nid})
+    }).then(function(r) { return r.json(); }).catch(function() {});
+  }
+}
+
+function viewNotification() {
+  var popup = document.getElementById('notif-popup');
+  if (!popup) return;
+  var nid = popup.dataset.notifId;
+  popup.style.display = 'none';
+  popup.dataset.showing = '';
+  if (notifTimeout) clearTimeout(notifTimeout);
+  if (nid) {
+    fetch('/api/index.php?action=notifications/mark_read', {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id: nid})
+    }).then(function(r) { return r.json(); }).catch(function() {});
+  }
+  navigateTo('notifications-screen');
+}
+
+// Start polling after login
+var origLogin = quickLogin;
+quickLogin = function() {
+  origLogin();
+  if (App.user && App.user.id) {
+    pollNotifications();
+    setInterval(pollNotifications, 30000);
+  }
+};
+
+// Also poll when DOM is ready if already logged in
+document.addEventListener('DOMContentLoaded', function() {
+  var loggedIn = localStorage.getItem('tripany-user');
+  if (loggedIn) {
+    setTimeout(function() {
+      pollNotifications();
+      setInterval(pollNotifications, 30000);
+    }, 3000);
+  }
+});
+
+console.log('🚗 TripAny — Premium Vehicle Rental App');
+console.log('Theme:', App.theme, '| User:', App.user.name);
+</script>
+</body>
+</html>

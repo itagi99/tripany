@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/index.php",
+      "dest": "api/server"
+    },
+    {
+      "src": "/uploads/(.*)",
+      "dest": "/vehigo-php/uploads/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/vehigo-php/mobile/$1"
+    }
+  ]
+}

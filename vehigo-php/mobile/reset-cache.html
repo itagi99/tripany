@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Resetting...</title></head>
+<body style="background:#F8FAFC;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;font-family:sans-serif;">
+<div style="text-align:center;">
+<h2 style="color:#1E293B;">Clearing cache & service worker...</h2>
+<script>
+(async function() {
+  if ('serviceWorker' in navigator) {
+    var regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map(function(r) { return r.unregister(); }));
+  }
+  if ('caches' in window) {
+    var keys = await caches.keys();
+    await Promise.all(keys.map(function(k) { return caches.delete(k); }));
+  }
+  window.location.replace('/mobile/?' + Date.now());
+})();
+</script>
+</body>
+</html>

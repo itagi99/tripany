@@ -1,5 +1,6 @@
 const { createClient } = require('@libsql/client');
 const path = require('path');
+const crypto = require('crypto');
 
 function getDb() {
   const url = process.env.TURSO_DB_URL;
@@ -7,10 +8,11 @@ function getDb() {
   if (url && token) {
     return createClient({ url, authToken: token });
   }
-  return createClient({
-    url: 'file:' + path.join(__dirname, '..', 'vehigo-php', 'vehigo.db'),
-  });
+  return createClient({ url: 'file:' + path.join(__dirname, '..', 'vehigo-php', 'vehigo.db') });
 }
+
+const ADMIN_TOKENS = new Set();
+const ADMIN_SECRET = process.env.SESSION_SECRET || 'tripany-admin-secret-key';
 
 module.exports = async (req, res) => {
   const db = getDb();
@@ -31,7 +33,7 @@ module.exports = async (req, res) => {
 
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Content-Type', 'application/json');
 
   if (req.method === 'OPTIONS') { res.statusCode = 200; res.end(''); return; }
@@ -44,9 +46,16 @@ module.exports = async (req, res) => {
     json({ success: false, error: msg }, status);
   }
 
+  function verifyAdmin() {
+    const auth = req.headers.authorization || '';
+    const token = auth.replace('Bearer ', '');
+    return ADMIN_TOKENS.has(token);
+  }
+
   try {
     switch (action) {
 
+      // ── CUSTOMER AUTH ──
       case 'auth/login': {
         const phone = all.phone || '';
         if (phone.length < 10) return err('Invalid phone number');
@@ -83,6 +92,350 @@ module.exports = async (req, res) => {
         return json({ success: true, user });
       }
 
+      // ── ADMIN AUTH ──
+      case 'admin/login': {
+        const username = all.username || '';
+        const password = all.password || '';
+        if (username === 'admin' && password === 'admin123') {
+          const token = crypto.randomBytes(32).toString('hex');
+          ADMIN_TOKENS.add(token);
+          return json({ success: true, token, user: { username: 'admin', role: 'super_admin' } });
+        }
+        return err('Invalid credentials', 401);
+      }
+
+      case 'admin/verify': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        return json({ success: true, user: { username: 'admin', role: 'super_admin' } });
+      }
+
+      // ── VEHICLES ──
+      case 'admin/vehicles': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const search = all.search || '';
+        const type = all.type || '';
+        let sql = "SELECT v.*, vc.name as category_name FROM vehicles v LEFT JOIN vehicle_categories vc ON v.category_id = vc.id WHERE 1=1";
+        const args = [];
+        if (type) { sql += " AND v.type=?"; args.push(type); }
+        if (search) { sql += " AND (v.name LIKE ? OR v.brand LIKE ? OR v.model LIKE ?)"; args.push('%'+search+'%','%'+search+'%','%'+search+'%'); }
+        sql += " ORDER BY v.created_at DESC";
+        return json((await db.execute({ sql, args })).rows);
+      }
+
+      case 'admin/vehicle/add': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const r = await db.execute({
+          sql: `INSERT INTO vehicles (category_id,name,brand,model,year,type,fuel_type,transmission,seats,bags,price_per_day,price_per_km,image,description,features,inclusions,exclusions,facilities,terms,cancellation_policy,is_active,is_featured,total_bookings,rating,total_reviews)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+          args: [all.category_id||1, all.name||'', all.brand||'', all.model||'', all.year||2024, all.type||'Sedan', all.fuel_type||'Petrol', all.transmission||'Manual', all.seats||5, all.bags||2, all.price_per_day||0, all.price_per_km||0, all.image||'', all.description||'', all.features||'', all.inclusions||'', all.exclusions||'', all.facilities||'', all.terms||'', all.cancellation_policy||'', all.is_active?1:0, all.is_featured?1:0, 0, 0, 0]
+        });
+        return json({ success: true, id: Number(r.lastInsertRowid) });
+      }
+
+      case 'admin/vehicle/update': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing vehicle id');
+        await db.execute({
+          sql: `UPDATE vehicles SET category_id=?,name=?,brand=?,model=?,year=?,type=?,fuel_type=?,transmission=?,seats=?,bags=?,price_per_day=?,price_per_km=?,image=?,description=?,features=?,inclusions=?,exclusions=?,facilities=?,terms=?,cancellation_policy=?,is_active=?,is_featured=? WHERE id=?`,
+          args: [all.category_id||1, all.name||'', all.brand||'', all.model||'', all.year||2024, all.type||'Sedan', all.fuel_type||'Petrol', all.transmission||'Manual', all.seats||5, all.bags||2, all.price_per_day||0, all.price_per_km||0, all.image||'', all.description||'', all.features||'', all.inclusions||'', all.exclusions||'', all.facilities||'', all.terms||'', all.cancellation_policy||'', all.is_active?1:0, all.is_featured?1:0, id]
+        });
+        return json({ success: true });
+      }
+
+      case 'admin/vehicle/delete': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing vehicle id');
+        await db.execute({ sql: "DELETE FROM vehicles WHERE id=?", args: [id] });
+        return json({ success: true });
+      }
+
+      // ── DRIVERS ──
+      case 'admin/drivers': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        return json((await db.execute({ sql: "SELECT * FROM drivers ORDER BY created_at DESC" })).rows);
+      }
+
+      case 'admin/driver/add': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const r = await db.execute({
+          sql: `INSERT INTO drivers (name,phone,license_number,vehicle_model,vehicle_number,status,rating,total_trips,lat,lng)
+                VALUES (?,?,?,?,?,?,?,?,?,?)`,
+          args: [all.name||'', all.phone||'', all.license_number||'', all.vehicle_model||'', all.vehicle_number||'', all.status||'offline', all.rating||0, all.total_trips||0, all.lat||null, all.lng||null]
+        });
+        return json({ success: true, id: Number(r.lastInsertRowid) });
+      }
+
+      case 'admin/driver/update': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing driver id');
+        await db.execute({
+          sql: `UPDATE drivers SET name=?,phone=?,license_number=?,vehicle_model=?,vehicle_number=?,status=?,rating=?,total_trips=?,lat=?,lng=? WHERE id=?`,
+          args: [all.name||'', all.phone||'', all.license_number||'', all.vehicle_model||'', all.vehicle_number||'', all.status||'offline', all.rating||0, all.total_trips||0, all.lat||null, all.lng||null, id]
+        });
+        return json({ success: true });
+      }
+
+      case 'admin/driver/delete': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing driver id');
+        await db.execute({ sql: "DELETE FROM drivers WHERE id=?", args: [id] });
+        return json({ success: true });
+      }
+
+      // ── BOOKINGS ──
+      case 'admin/bookings': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const status = all.status || '';
+        let sql = "SELECT b.*, u.name as user_name, u.phone as user_phone, v.name as vehicle_name, v.type as vehicle_type FROM bookings b LEFT JOIN users u ON b.user_id = u.id LEFT JOIN vehicles v ON b.vehicle_id = v.id WHERE 1=1";
+        const args = [];
+        if (status && status !== 'all') { sql += " AND b.status=?"; args.push(status); }
+        sql += " ORDER BY b.created_at DESC";
+        return json((await db.execute({ sql, args })).rows);
+      }
+
+      case 'admin/booking/update': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing booking id');
+        const status = all.status || '';
+        const driverId = all.driver_id || null;
+        if (status) {
+          await db.execute({ sql: "UPDATE bookings SET status=? WHERE id=?", args: [status, id] });
+        }
+        if (driverId) {
+          await db.execute({ sql: "UPDATE bookings SET driver_id=? WHERE id=?", args: [driverId, id] });
+        }
+        return json({ success: true });
+      }
+
+      // ── CATEGORIES ──
+      case 'admin/categories': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        return json((await db.execute({ sql: "SELECT * FROM vehicle_categories ORDER BY sort_order ASC" })).rows);
+      }
+
+      case 'admin/category/add': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const r = await db.execute({ sql: "INSERT INTO vehicle_categories (name,slug,icon,sort_order,active) VALUES (?,?,?,?,?)", args: [all.name||'', all.slug||'', all.icon||'', all.sort_order||0, 1] });
+        return json({ success: true, id: Number(r.lastInsertRowid) });
+      }
+
+      case 'admin/category/update': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing category id');
+        await db.execute({ sql: "UPDATE vehicle_categories SET name=?,slug=?,icon=?,sort_order=?,active=? WHERE id=?", args: [all.name||'', all.slug||'', all.icon||'', all.sort_order||0, all.active?1:0, id] });
+        return json({ success: true });
+      }
+
+      case 'admin/category/delete': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing category id');
+        await db.execute({ sql: "DELETE FROM vehicle_categories WHERE id=?", args: [id] });
+        return json({ success: true });
+      }
+
+      // ── PRICING PACKAGES ──
+      case 'admin/pricing': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        return json((await db.execute({ sql: "SELECT pp.*, v.name as vehicle_name FROM pricing_packages pp LEFT JOIN vehicles v ON pp.vehicle_id = v.id ORDER BY pp.vehicle_id, pp.hours ASC" })).rows);
+      }
+
+      case 'admin/pricing/add': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const r = await db.execute({ sql: "INSERT INTO pricing_packages (vehicle_id,hours,kms,price,label,is_active) VALUES (?,?,?,?,?,?)", args: [all.vehicle_id||0, all.hours||1, all.kms||0, all.price||0, all.label||'', all.is_active?1:0] });
+        return json({ success: true, id: Number(r.lastInsertRowid) });
+      }
+
+      case 'admin/pricing/update': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing pricing id');
+        await db.execute({ sql: "UPDATE pricing_packages SET vehicle_id=?,hours=?,kms=?,price=?,label=?,is_active=? WHERE id=?", args: [all.vehicle_id||0, all.hours||1, all.kms||0, all.price||0, all.label||'', all.is_active?1:0, id] });
+        return json({ success: true });
+      }
+
+      case 'admin/pricing/delete': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing pricing id');
+        await db.execute({ sql: "DELETE FROM pricing_packages WHERE id=?", args: [id] });
+        return json({ success: true });
+      }
+
+      // ── TOUR PACKAGES ──
+      case 'admin/tours': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        return json((await db.execute({ sql: "SELECT * FROM tour_packages ORDER BY tour_date DESC" })).rows);
+      }
+
+      case 'admin/tour/add': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const r = await db.execute({
+          sql: `INSERT INTO tour_packages (title,destination,tour_date,return_date,description,vehicle_type,price_per_person,max_participants,current_participants,included_items,add_ons,is_active)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+          args: [all.title||'', all.destination||'', all.tour_date||'', all.return_date||'', all.description||'', all.vehicle_type||'', all.price_per_person||0, all.max_participants||0, all.current_participants||0, all.included_items||'', all.add_ons||'', all.is_active?1:0]
+        });
+        return json({ success: true, id: Number(r.lastInsertRowid) });
+      }
+
+      case 'admin/tour/update': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing tour id');
+        await db.execute({
+          sql: `UPDATE tour_packages SET title=?,destination=?,tour_date=?,return_date=?,description=?,vehicle_type=?,price_per_person=?,max_participants=?,current_participants=?,included_items=?,add_ons=?,is_active=? WHERE id=?`,
+          args: [all.title||'', all.destination||'', all.tour_date||'', all.return_date||'', all.description||'', all.vehicle_type||'', all.price_per_person||0, all.max_participants||0, all.current_participants||0, all.included_items||'', all.add_ons||'', all.is_active?1:0, id]
+        });
+        return json({ success: true });
+      }
+
+      case 'admin/tour/delete': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing tour id');
+        await db.execute({ sql: "DELETE FROM tour_packages WHERE id=?", args: [id] });
+        return json({ success: true });
+      }
+
+      // ── COUPONS ──
+      case 'admin/coupons': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        return json((await db.execute({ sql: "SELECT * FROM coupons ORDER BY created_at DESC" })).rows);
+      }
+
+      case 'admin/coupon/add': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const r = await db.execute({
+          sql: `INSERT INTO coupons (code,description,discount_type,discount_value,min_fare,max_discount,usage_limit,used_count,valid_from,valid_until,is_active)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
+          args: [all.code||'', all.description||'', all.discount_type||'percentage', all.discount_value||0, all.min_fare||0, all.max_discount||0, all.usage_limit||0, 0, all.valid_from||'', all.valid_until||'', all.is_active?1:0]
+        });
+        return json({ success: true, id: Number(r.lastInsertRowid) });
+      }
+
+      case 'admin/coupon/update': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing coupon id');
+        await db.execute({
+          sql: `UPDATE coupons SET code=?,description=?,discount_type=?,discount_value=?,min_fare=?,max_discount=?,usage_limit=?,valid_from=?,valid_until=?,is_active=? WHERE id=?`,
+          args: [all.code||'', all.description||'', all.discount_type||'percentage', all.discount_value||0, all.min_fare||0, all.max_discount||0, all.usage_limit||0, all.valid_from||'', all.valid_until||'', all.is_active?1:0, id]
+        });
+        return json({ success: true });
+      }
+
+      case 'admin/coupon/delete': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing coupon id');
+        await db.execute({ sql: "DELETE FROM coupons WHERE id=?", args: [id] });
+        return json({ success: true });
+      }
+
+      // ── BANNERS ──
+      case 'admin/banners': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        return json((await db.execute({ sql: "SELECT * FROM banners ORDER BY sort_order ASC" })).rows);
+      }
+
+      case 'admin/banner/add': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const r = await db.execute({
+          sql: "INSERT INTO banners (title,image_url,link_url,sort_order,is_active) VALUES (?,?,?,?,?)",
+          args: [all.title||'', all.image_url||'', all.link_url||'', all.sort_order||0, all.is_active?1:0]
+        });
+        return json({ success: true, id: Number(r.lastInsertRowid) });
+      }
+
+      case 'admin/banner/update': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing banner id');
+        await db.execute({ sql: "UPDATE banners SET title=?,image_url=?,link_url=?,sort_order=?,is_active=? WHERE id=?", args: [all.title||'', all.image_url||'', all.link_url||'', all.sort_order||0, all.is_active?1:0, id] });
+        return json({ success: true });
+      }
+
+      case 'admin/banner/delete': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing banner id');
+        await db.execute({ sql: "DELETE FROM banners WHERE id=?", args: [id] });
+        return json({ success: true });
+      }
+
+      // ── OFFERS ──
+      case 'admin/offers': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        return json((await db.execute({ sql: "SELECT * FROM offers ORDER BY created_at DESC" })).rows);
+      }
+
+      case 'admin/offer/add': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const r = await db.execute({
+          sql: "INSERT INTO offers (title,description,discount_percent,code,valid_from,valid_until,is_active) VALUES (?,?,?,?,?,?,?)",
+          args: [all.title||'', all.description||'', all.discount_percent||0, all.code||'', all.valid_from||'', all.valid_until||'', all.is_active?1:0]
+        });
+        return json({ success: true, id: Number(r.lastInsertRowid) });
+      }
+
+      case 'admin/offer/update': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing offer id');
+        await db.execute({ sql: "UPDATE offers SET title=?,description=?,discount_percent=?,code=?,valid_from=?,valid_until=?,is_active=? WHERE id=?", args: [all.title||'', all.description||'', all.discount_percent||0, all.code||'', all.valid_from||'', all.valid_until||'', all.is_active?1:0, id] });
+        return json({ success: true });
+      }
+
+      case 'admin/offer/delete': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing offer id');
+        await db.execute({ sql: "DELETE FROM offers WHERE id=?", args: [id] });
+        return json({ success: true });
+      }
+
+      // ── SOS ALERTS ──
+      case 'admin/sos': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        return json((await db.execute({ sql: "SELECT s.*, u.name as user_name, u.phone as user_phone FROM sos_alerts s LEFT JOIN users u ON s.user_id = u.id ORDER BY s.created_at DESC" })).rows);
+      }
+
+      // ── DASHBOARD ──
+      case 'admin/dashboard': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const totalBookings = (await db.execute({ sql: "SELECT COUNT(*) as c FROM bookings" })).rows[0].c;
+        const totalRevenue = (await db.execute({ sql: "SELECT COALESCE(SUM(total_fare),0) as c FROM bookings WHERE status='completed'" })).rows[0].c;
+        const activeDrivers = (await db.execute({ sql: "SELECT COUNT(*) as c FROM drivers WHERE status='online'" })).rows[0].c;
+        const totalUsers = (await db.execute({ sql: "SELECT COUNT(*) as c FROM users" })).rows[0].c;
+        const totalVehicles = (await db.execute({ sql: "SELECT COUNT(*) as c FROM vehicles WHERE is_active=1" })).rows[0].c;
+        const pendingBookings = (await db.execute({ sql: "SELECT COUNT(*) as c FROM bookings WHERE status='pending'" })).rows[0].c;
+        const recentBookings = (await db.execute({
+          sql: "SELECT b.*, u.name as user_name, v.name as vehicle_name FROM bookings b LEFT JOIN users u ON b.user_id = u.id LEFT JOIN vehicles v ON b.vehicle_id = v.id ORDER BY b.created_at DESC LIMIT 5"
+        })).rows;
+        const topDrivers = (await db.execute({ sql: "SELECT * FROM drivers ORDER BY rating DESC LIMIT 3" })).rows;
+        const sosAlerts = (await db.execute({ sql: "SELECT COUNT(*) as c FROM sos_alerts WHERE resolved=0" })).rows[0].c;
+        return json({
+          totalBookings, totalRevenue, activeDrivers, totalUsers, totalVehicles,
+          pendingBookings, recentBookings, topDrivers, sosAlerts
+        });
+      }
+
+      // ── SEND NOTIFICATION ──
+      case 'admin/notification/send': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const userId = parseInt(all.user_id) || 0;
+        if (!userId || !all.title) return err('Missing user_id or title');
+        await db.execute({ sql: "INSERT INTO notifications (user_id,title,message,type) VALUES (?,?,?,?)", args: [userId, all.title, all.message||'', all.type||'info'] });
+        return json({ success: true });
+      }
+
+      // ── PUBLIC ENDPOINTS (no auth) ──
       case 'vehicles/list': {
         const type = all.type || '';
         let sql = "SELECT v.*, vc.name as category_name FROM vehicles v LEFT JOIN vehicle_categories vc ON v.category_id = vc.id WHERE v.is_active=1";
@@ -174,7 +527,7 @@ module.exports = async (req, res) => {
         booking.driver_assigned = !!(booking.driver_id && ['confirmed','ongoing','completed'].includes(booking.status));
         if (booking.driver_assigned) {
           const d = await db.execute({ sql: "SELECT vehicle_model, vehicle_number, rating FROM drivers WHERE id=?", args: [booking.driver_id] });
-          if (d.rows.length > 0) booking.driver_vehicle = (d.rows[0].vehicle_model||'') + ' \u00B7 ' + (d.rows[0].vehicle_number||'');
+          if (d.rows.length > 0) booking.driver_vehicle = (d.rows[0].vehicle_model||'') + ' · ' + (d.rows[0].vehicle_number||'');
         }
         if (booking.pickup_lat && booking.drop_lat) {
           booking.navigation_url = `https://www.google.com/maps/dir/?api=1&origin=${booking.pickup_lat},${booking.pickup_lng}&destination=${booking.drop_lat},${booking.drop_lng}&travelmode=driving`;
@@ -211,6 +564,11 @@ module.exports = async (req, res) => {
         if (!targetUserId || !all.title) return err('Missing user_id or title');
         await db.execute({ sql: "INSERT INTO notifications (user_id, title, message, type) VALUES (?,?,?,?)", args: [targetUserId, all.title, all.message||'', all.type||'info'] });
         return json({ success: true });
+      }
+
+      // ── PUBLIC OFFERS ──
+      case 'offers/list': {
+        return json((await db.execute({ sql: "SELECT * FROM offers WHERE is_active=1 ORDER BY created_at DESC" })).rows);
       }
 
       default:

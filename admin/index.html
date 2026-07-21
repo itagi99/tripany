@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>TripAny Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg:#0B1120; --bg-card:#111827; --bg-card-hover:#1A2332; --bg-input:#1A2332;
+  --primary:#38BDF8; --primary-hover:#0EA5E9; --secondary:#7DD3FC;
+  --success:#22C55E; --warning:#F59E0B; --danger:#EF4444;
+  --text:#F1F5F9; --text-secondary:#94A3B8; --text-muted:#64748B;
+  --border:#1E293B; --border-hover:#334155;
+  --shadow:0 4px 24px rgba(0,0,0,0.3); --radius-sm:8px; --radius-md:12px; --radius-lg:16px; --radius-xl:24px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
+
+/* SIDEBAR */
+.sidebar{width:260px;min-height:100vh;background:var(--bg-card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:all 0.3s;}
+.sidebar-header{padding:1.25rem;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.sidebar-logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:1rem;flex-shrink:0;}
+.sidebar-brand-name{font-size:1rem;font-weight:800;color:var(--text);}
+.sidebar-brand-sub{font-size:0.625rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+.sidebar-nav{flex:1;padding:0.5rem;overflow-y:auto;}
+.sidebar-section{margin-bottom:0.25rem;}
+.sidebar-section-label{font-size:0.625rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;padding:0.75rem 0.75rem 0.375rem;opacity:0.5;}
+.nav-link{display:flex;align-items:center;gap:10px;padding:0.5rem 0.75rem;color:var(--text-secondary);text-decoration:none;border-radius:var(--radius-sm);transition:all 0.2s;font-size:0.8125rem;font-weight:500;cursor:pointer;margin-bottom:1px;}
+.nav-link:hover{background:var(--bg-card-hover);color:var(--text);}
+.nav-link.active{background:rgba(56,189,248,0.1);color:var(--primary);font-weight:600;}
+.nav-link.active i{color:var(--primary);}
+.nav-link i{font-size:1rem;width:20px;text-align:center;opacity:0.6;}
+.sidebar-footer{padding:0.5rem;border-top:1px solid var(--border);}
+.sidebar-footer .nav-link{color:var(--text-muted);}
+.sidebar-footer .nav-link:hover{color:var(--danger);}
+
+/* MAIN */
+.main{flex:1;margin-left:260px;min-height:100vh;}
+.topbar{height:60px;background:rgba(11,17,32,0.8);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:50;}
+.topbar-left{display:flex;align-items:center;gap:1rem;}
+.topbar-right{display:flex;align-items:center;gap:0.5rem;}
+.topbar h2{font-size:1rem;font-weight:700;color:var(--text);}
+.admin-badge{display:flex;align-items:center;gap:0.5rem;padding:0.25rem 0.75rem 0.25rem 0.25rem;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;}
+.admin-badge .avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.75rem;}
+.admin-badge span{font-size:0.75rem;font-weight:600;color:var(--text);}
+
+.content{padding:1.25rem;animation:fadeIn 0.3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;margin-bottom:1.25rem;}
+.stat-card{padding:1.25rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--primary),transparent);opacity:0;transition:all 0.3s;}
+.stat-card:hover::before{opacity:1;}
+.stat-card:hover{box-shadow:var(--shadow);}
+.stat-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:0.5rem;}
+.stat-icon{width:40px;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.stat-icon.blue{background:rgba(56,189,248,0.12);color:var(--primary)}
+.stat-icon.green{background:rgba(34,197,94,0.12);color:var(--success)}
+.stat-icon.yellow{background:rgba(245,158,11,0.12);color:var(--warning)}
+.stat-icon.red{background:rgba(239,68,68,0.12);color:var(--danger)}
+.stat-icon.purple{background:rgba(168,85,247,0.12);color:#a855f7}
+.stat-value{font-size:1.5rem;font-weight:800;color:var(--text);line-height:1.1;margin-bottom:0.125rem;}
+.stat-label{font-size:0.75rem;color:var(--text-muted);font-weight:500;}
+
+/* CARDS */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:1rem;}
+.card-header{padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:0.5rem;}
+.card-header h3{font-size:0.9375rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:0.5rem;}
+.card-header h3 i{color:var(--primary);}
+.card-body{padding:1.25rem;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:var(--radius-sm);font-size:0.8125rem;font-weight:600;font-family:inherit;cursor:pointer;transition:all 0.2s;border:none;outline:none;text-decoration:none;white-space:nowrap;}
+.btn-primary{background:var(--primary);color:white;}
+.btn-primary:hover{background:var(--primary-hover);}
+.btn-secondary{background:var(--bg-input);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--border-hover);}
+.btn-danger{background:rgba(239,68,68,0.12);color:var(--danger);border:1px solid rgba(239,68,68,0.2);}
+.btn-danger:hover{background:var(--danger);color:white;}
+.btn-success{background:rgba(34,197,94,0.12);color:var(--success);border:1px solid rgba(34,197,94,0.2);}
+.btn-success:hover{background:var(--success);color:white;}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--bg-card-hover);color:var(--text);}
+.btn-sm{padding:0.375rem 0.625rem;font-size:0.75rem;}
+.btn-xs{padding:0.25rem 0.5rem;font-size:0.6875rem;border-radius:6px;}
+.btn-block{width:100%;justify-content:center;}
+.btn-lg{padding:0.625rem 1.25rem;font-size:0.875rem;}
+.btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:separate;border-spacing:0;}
+thead th{font-size:0.625rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;padding:0.75rem 0.875rem;border-bottom:1px solid var(--border);white-space:nowrap;text-align:left;}
+tbody tr{transition:all 0.15s;}
+tbody tr:hover{background:rgba(255,255,255,0.02);}
+tbody td{padding:0.75rem 0.875rem;border-bottom:1px solid var(--border);font-size:0.8125rem;color:var(--text-secondary);vertical-align:middle;}
+.cell-primary{font-weight:600;color:var(--text);}
+.cell-muted{font-size:0.6875rem;color:var(--text-muted);}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:0.2rem 0.5rem;border-radius:20px;font-size:0.625rem;font-weight:600;}
+.badge-pending,.badge-warning{background:rgba(245,158,11,0.12);color:var(--warning);}
+.badge-active,.badge-success,.badge-completed,.badge-online{background:rgba(34,197,94,0.12);color:var(--success);}
+.badge-info,.badge-confirmed{background:rgba(56,189,248,0.12);color:var(--primary);}
+.badge-danger,.badge-cancelled,.badge-offline{background:rgba(239,68,68,0.12);color:var(--danger);}
+.badge-inactive{background:rgba(100,116,139,0.12);color:var(--text-muted);}
+
+/* FORMS */
+.form-group{margin-bottom:0.75rem;}
+.form-label{display:block;font-size:0.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.375rem;}
+.form-input,.form-select{width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.5rem 0.75rem;color:var(--text);font-size:0.8125rem;font-family:inherit;transition:all 0.2s;outline:none;box-sizing:border-box;}
+.form-input:focus,.form-select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(56,189,248,0.15);}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748B' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 0.75rem center;padding-right:2rem;}
+.form-check{display:flex;align-items:center;gap:0.5rem;}
+.form-check input[type=checkbox]{width:16px;height:16px;accent-color:var(--primary);}
+textarea.form-input{min-height:80px;resize:vertical;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}
+@media(max-width:640px){.form-row{grid-template-columns:1fr;}}
+
+/* MODAL */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:999;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;}
+.modal-backdrop.show{display:flex;}
+.modal-card{width:100%;max-width:560px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:var(--shadow);animation:modalIn 0.25s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-head{padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+.modal-head h3{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;}
+.modal-head h3 i{color:var(--primary);}
+.modal-body{padding:1.25rem;max-height:65vh;overflow-y:auto;}
+.modal-foot{padding:0.75rem 1.25rem;display:flex;justify-content:flex-end;gap:0.5rem;border-top:1px solid var(--border);}
+
+/* FILTER PILLS */
+.filter-pills{display:flex;gap:0.375rem;flex-wrap:wrap;margin-bottom:1rem;}
+.filter-pill{padding:0.3rem 0.75rem;border-radius:20px;font-size:0.75rem;font-weight:500;background:var(--bg-input);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;transition:all 0.2s;}
+.filter-pill:hover,.filter-pill.active{background:rgba(56,189,248,0.12);color:var(--primary);border-color:rgba(56,189,248,0.3);}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:2.5rem 1rem;}
+.empty-state i{font-size:2.5rem;color:var(--text-muted);opacity:0.3;margin-bottom:0.75rem;display:block;}
+.empty-state h4{font-size:0.875rem;font-weight:700;color:var(--text-secondary);margin-bottom:0.25rem;}
+.empty-state p{font-size:0.75rem;color:var(--text-muted);}
+
+/* LOGIN */
+.login-page{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:2000;}
+.login-card{width:100%;max-width:380px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2rem;box-shadow:var(--shadow);}
+.login-logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:1.5rem;margin:0 auto 0.75rem;}
+.login-card h2{text-align:center;font-size:1.25rem;font-weight:800;margin-bottom:0.25rem;}
+.login-card p{text-align:center;color:var(--text-muted);font-size:0.8125rem;margin-bottom:1.5rem;}
+.login-error{text-align:center;color:var(--danger);font-size:0.75rem;margin-bottom:0.75rem;display:none;}
+
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;padding:0.5rem 1rem;border-radius:10px;font-size:0.8125rem;font-weight:600;backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,0.3);animation:slideDown 0.3s ease;display:none;}
+.toast.success{background:rgba(34,197,94,0.9);color:white;}
+.toast.error{background:rgba(239,68,68,0.9);color:white;}
+@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+  .main{margin-left:0;}
+  .hamburger{display:flex !important;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr;}
+  .content{padding:0.75rem;}
+}
+
+.hamburger{display:none;width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:none;color:var(--text-secondary);align-items:center;justify-content:center;cursor:pointer;font-size:1.125rem;}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<!-- LOGIN PAGE -->
+<div id="login-page" class="login-page">
+  <div class="login-card">
+    <div class="login-logo">T</div>
+    <h2>Admin Login</h2>
+    <p>Sign in to manage TripAny</p>
+    <div class="login-error" id="login-error">Invalid credentials</div>
+    <div class="form-group"><label class="form-label">Username</label><input type="text" id="login-username" class="form-input" placeholder="admin" value="admin"></div>
+    <div class="form-group"><label class="form-label">Password</label><input type="password" id="login-password" class="form-input" placeholder="admin123" value="admin123"></div>
+    <button class="btn btn-primary btn-block btn-lg" onclick="adminLogin()" id="login-btn">Sign In</button>
+    <p style="text-align:center;margin-top:1rem;font-size:0.6875rem;color:var(--text-muted);">Default: admin / admin123</p>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">T</div>
+    <div><div class="sidebar-brand-name">TripAny</div><div class="sidebar-brand-sub">Fleet Admin</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section"><div class="sidebar-section-label">Main</div>
+      <a class="nav-link active" onclick="switchPage('dashboard',this)"><i class="bi bi-grid-1x2-fill"></i>Dashboard</a>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Fleet</div>
+      <a class="nav-link" onclick="switchPage('vehicles',this)"><i class="bi bi-car-front-fill"></i>Vehicles</a>
+      <a class="nav-link" onclick="switchPage('drivers',this)"><i class="bi bi-person-badge-fill"></i>Drivers</a>
+      <a class="nav-link" onclick="switchPage('categories',this)"><i class="bi bi-tags-fill"></i>Categories</a>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Operations</div>
+      <a class="nav-link" onclick="switchPage('bookings',this)"><i class="bi bi-calendar2-check-fill"></i>Bookings</a>
+      <a class="nav-link" onclick="switchPage('pricing',this)"><i class="bi bi-currency-rupee"></i>Pricing</a>
+      <a class="nav-link" onclick="switchPage('tours',this)"><i class="bi bi-suitcase-lg-fill"></i>Tour Packages</a>
+      <a class="nav-link" onclick="switchPage('addons',this)"><i class="bi bi-box-seam"></i>Tour Add-ons</a>
+      <a class="nav-link" onclick="switchPage('sos',this)"><i class="bi bi-exclamation-triangle-fill"></i>SOS Alerts</a>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Marketing</div>
+      <a class="nav-link" onclick="switchPage('coupons',this)"><i class="bi bi-ticket-perforated-fill"></i>Coupons</a>
+      <a class="nav-link" onclick="switchPage('banners',this)"><i class="bi bi-image-fill"></i>Banners</a>
+      <a class="nav-link" onclick="switchPage('offers',this)"><i class="bi bi-percent"></i>Offers</a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <a class="nav-link" onclick="adminLogout()"><i class="bi bi-box-arrow-left"></i>Logout</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="bi bi-list"></i></button>
+      <h2 id="page-title">Dashboard</h2>
+    </div>
+    <div class="topbar-right">
+      <div class="admin-badge"><div class="avatar">A</div><span>Admin</span></div>
+    </div>
+  </div>
+  <div class="content" id="page-content">
+    <div style="text-align:center;padding:3rem;color:var(--text-muted);">Loading...</div>
+  </div>
+</div>
+
+<script>
+const API = '/api/index.php';
+let ADMIN_TOKEN = localStorage.getItem('tripany-admin-token') || '';
+
+async function apiCall(action, data, method) {
+  const opts = { headers: {} };
+  opts.headers['Content-Type'] = 'application/json';
+  if (ADMIN_TOKEN) opts.headers['Authorization'] = 'Bearer ' + ADMIN_TOKEN;
+  if (method === 'POST' || data) {
+    opts.method = 'POST';
+    opts.body = JSON.stringify(data || {});
+  }
+  const qs = method === 'POST' ? '' : (data ? '&' + new URLSearchParams(data).toString() : '');
+  const res = await fetch(API + '?action=' + action + qs, opts);
+  return res.json();
+}
+
+function apiGet(action, params) { return apiCall(action, params, 'GET'); }
+function apiPost(action, data) { return apiCall(action, data, 'POST'); }
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + type; t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+
+// AUTH
+async function adminLogin() {
+  const username = document.getElementById('login-username').value;
+  const password = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  try {
+    const res = await apiPost('admin/login', { username, password });
+    if (res.success && res.token) {
+      ADMIN_TOKEN = res.token;
+      localStorage.setItem('tripany-admin-token', res.token);
+      document.getElementById('login-page').style.display = 'none';
+      showToast('Welcome Admin!', 'success');
+      switchPage('dashboard');
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  } catch(e) { document.getElementById('login-error').style.display = 'block'; }
+  btn.disabled = false; btn.textContent = 'Sign In';
+}
+
+function adminLogout() {
+  localStorage.removeItem('tripany-admin-token');
+  ADMIN_TOKEN = '';
+  document.getElementById('login-page').style.display = 'flex';
+  showToast('Logged out', 'success');
+}
+
+// ROUTER
+function switchPage(page, el) {
+  if (el) document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('page-title').textContent = page.charAt(0).toUpperCase() + page.slice(1);
+  if (page === 'dashboard') loadDashboard();
+  else if (page === 'vehicles') loadVehicles();
+  else if (page === 'drivers') loadDrivers();
+  else if (page === 'categories') loadCategories();
+  else if (page === 'bookings') loadBookings();
+  else if (page === 'pricing') loadPricing();
+  else if (page === 'tours') loadTours();
+  else if (page === 'addons') loadAddons();
+  else if (page === 'coupons') loadCoupons();
+  else if (page === 'banners') loadBanners();
+  else if (page === 'offers') loadOffers();
+  else if (page === 'sos') loadSOS();
+  // Close sidebar on mobile
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+// INIT
+document.addEventListener('DOMContentLoaded', async () => {
+  if (ADMIN_TOKEN) {
+    try {
+      const res = await apiPost('admin/verify');
+      if (res.success) { document.getElementById('login-page').style.display = 'none'; switchPage('dashboard'); return; }
+    } catch(e) {}
+    localStorage.removeItem('tripany-admin-token');
+    ADMIN_TOKEN = '';
+  }
+});
+
+// ===================== HELPERS =====================
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function stars(r) { return Array(5).fill().map((_,i) => '<i class="bi bi-star-fill" style="color:'+(i<Math.round(r||0)?'#F59E0B':'var(--text-muted)')+';font-size:0.5rem;opacity:'+(i<Math.round(r||0)?'1':'0.3')+'"></i>').join(''); }
+
+function showModal(id) { document.getElementById(id).classList.add('show'); }
+function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// Close modals on backdrop click
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-backdrop')) e.target.classList.remove('show');
+});
+
+function formatDate(d) {
+  if (!d) return '';
+  const dt = new Date(d.replace(' ','T'));
+  return dt.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'});
+}
+
+function formatCurrency(n) {
+  return '₹' + Number(n||0).toLocaleString('en-IN');
+}
+
+// ===================== DASHBOARD =====================
+async function loadDashboard() {
+  const c = document.getElementById('page-content');
+  c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Loading dashboard...</div>';
+  try {
+    const d = await apiGet('admin/dashboard');
+    if (!d || d.error) { c.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Failed to load</h4><p>' + (d&&d.error||'Error') + '</p></div>'; return; }
+    c.innerHTML = `
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-header"><div class="stat-icon blue"><i class="bi bi-car-front"></i></div></div><div class="stat-value">${d.totalVehicles||0}</div><div class="stat-label">Active Vehicles</div></div>
+        <div class="stat-card"><div class="stat-header"><div class="stat-icon green"><i class="bi bi-calendar-check"></i></div></div><div class="stat-value">${d.totalBookings||0}</div><div class="stat-label">Total Bookings</div></div>
+        <div class="stat-card"><div class="stat-header"><div class="stat-icon yellow"><i class="bi bi-clock"></i></div></div><div class="stat-value">${d.pendingBookings||0}</div><div class="stat-label">Pending</div></div>
+        <div class="stat-card"><div class="stat-header"><div class="stat-icon purple"><i class="bi bi-currency-rupee"></i></div></div><div class="stat-value">${formatCurrency(d.totalRevenue)}</div><div class="stat-label">Revenue</div></div>
+        <div class="stat-card"><div class="stat-header"><div class="stat-icon green"><i class="bi bi-person-check"></i></div></div><div class="stat-value">${d.activeDrivers||0}</div><div class="stat-label">Online Drivers</div></div>
+        <div class="stat-card"><div class="stat-header"><div class="stat-icon blue"><i class="bi bi-people"></i></div></div><div class="stat-value">${d.totalUsers||0}</div><div class="stat-label">Total Users</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem;">
+        <div class="card">
+          <div class="card-header"><h3><i class="bi bi-clock-history"></i> Recent Bookings</h3></div>
+          <div class="card-body" style="padding:0;">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Booking</th><th>Customer</th><th>Vehicle</th><th>Fare</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody>${(d.recentBookings||[]).map(b => {
+                  const sc = {pending:'warning',confirmed:'info',ongoing:'info',completed:'success',cancelled:'danger'}[b.status]||'info';
+                  return '<tr><td class="cell-primary">#'+(b.booking_ref||b.id)+'</td><td>'+esc(b.user_name||'')+'</td><td>'+esc(b.vehicle_name||'')+'</td><td>'+formatCurrency(b.total_fare)+'</td><td><span class="badge badge-'+sc+'">'+(b.status||'')+'</span></td><td style="font-size:0.75rem;color:var(--text-muted);">'+formatDate(b.created_at)+'</td></tr>';
+                }).join('')}
+                ${(!d.recentBookings||!d.recentBookings.length) ? '<tr><td colspan="6"><div class="empty-state"><p>No bookings yet</p></div></td></tr>' : ''}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-header"><h3><i class="bi bi-person-badge"></i> Top Drivers</h3></div>
+            <div class="card-body">
+              ${(d.topDrivers||[]).map(drv => '<div style="display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0;border-bottom:1px solid var(--border);"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.75rem;flex-shrink:0;">'+(drv.name?drv.name[0]:'?')+'</div><div style="flex:1;"><div style="font-size:0.8125rem;font-weight:600;color:var(--text);">'+esc(drv.name||'')+'</div><div style="font-size:0.625rem;color:var(--text-muted);">'+esc(drv.vehicle_model||'')+'</div></div><span>'+stars(drv.rating)+'</span></div>').join('')||'<div style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.75rem;">No drivers</div>'}
+              ${(d.sosAlerts||0) > 0 ? '<div style="margin-top:0.75rem;padding:0.5rem 0.75rem;background:rgba(239,68,68,0.1);border-radius:8px;display:flex;align-items:center;gap:0.5rem;"><i class="bi bi-exclamation-triangle-fill" style="color:var(--danger);"></i><span style="font-size:0.75rem;color:var(--danger);font-weight:600;">'+d.sosAlerts+' active SOS alert(s)</span></div>' : ''}
+            </div>
+          </div>
+        </div>
+      </div>`;
+  } catch(e) { c.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Error</h4><p>' + e.message + '</p></div>'; }
+}
+
+// ===================== VEHICLES =====================
+async function loadVehicles() {
+  const c = document.getElementById('page-content');
+  c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Loading vehicles...</div>';
+  try {
+    const v = await apiGet('admin/vehicles');
+    c.innerHTML = `
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-card"><div class="stat-value">${v.length||0}</div><div class="stat-label">Total Vehicles</div></div>
+        <div class="stat-card"><div class="stat-value">${v.filter(x=>x.is_active).length||0}</div><div class="stat-label">Active</div></div>
+        <div class="stat-card"><div class="stat-value">${v.filter(x=>x.is_featured).length||0}</div><div class="stat-label">Featured</div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <div style="display:flex;gap:0.375rem;flex-wrap:wrap;" id="vehicle-filters">
+          <span class="filter-pill active" onclick="filterVehicles('',this)">All</span>
+          <span class="filter-pill" onclick="filterVehicles('SUV',this)">SUV</span>
+          <span class="filter-pill" onclick="filterVehicles('Sedan',this)">Sedan</span>
+          <span class="filter-pill" onclick="filterVehicles('Hatchback',this)">Hatchback</span>
+          <span class="filter-pill" onclick="filterVehicles('Bike',this)">Bike</span>
+          <span class="filter-pill" onclick="filterVehicles('Scooter',this)">Scooter</span>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="showVehicleModal()"><i class="bi bi-plus-lg"></i> Add</button>
+      </div>
+      <div class="card"><div class="card-body" style="padding:0;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Vehicle</th><th>Category</th><th>Seats</th><th>Price/Day</th><th>Price/Km</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="vehicles-tbody">${v.map(v => '<tr><td><div style="display:flex;align-items:center;gap:0.5rem;">'+(v.image?'<img src="'+v.image+'" alt="" style="width:44px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">':'<div style="width:44px;height:32px;border-radius:6px;background:var(--bg-input);display:flex;align-items:center;justify-content:center;"><i class="bi bi-car-front" style="color:var(--text-muted);font-size:0.625rem;"></i></div>')+'<div><div class="cell-primary">'+esc(v.name)+'</div><div class="cell-muted">'+esc(v.brand)+' · '+esc(v.model)+'</div></div></div></td><td><span class="badge badge-info">'+esc(v.category_name||v.type)+'</span></td><td>'+v.seats+'</td><td class="cell-primary">'+formatCurrency(v.price_per_day)+'</td><td>'+formatCurrency(v.price_per_km)+'</td><td>'+stars(v.rating)+'</td><td>'+(v.is_active?'<span class="badge badge-active">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+(v.is_featured?' <span class="badge badge-warning"><i class="bi bi-star-fill" style="font-size:0.5rem;"></i></span>':'')+'</td><td><button class="btn btn-ghost btn-xs" onclick="editVehicle('+JSON.stringify(v).replace(/"/g,"'")+')"><i class="bi bi-pencil"></i></button> <button class="btn btn-danger btn-xs" onclick="confirmDelete(\'vehicle\','+v.id+')"><i class="bi bi-trash3"></i></button></td></tr>').join('')}
+            ${!v.length?'<tr><td colspan="8"><div class="empty-state"><i class="bi bi-car-front"></i><h4>No vehicles</h4><p>Add your first vehicle</p></div></td></tr>':''}
+            </tbody>
+          </table>
+        </div>
+      </div></div>
+      <div id="vehicle-modal" class="modal-backdrop"><div class="modal-card">
+        <div class="modal-head"><h3 id="vehicle-modal-title"><i class="bi bi-car-front"></i> <span>Add Vehicle</span></h3><button class="btn btn-ghost btn-xs" onclick="hideModal('vehicle-modal')">&times;</button></div>
+        <div class="modal-body">
+          <input type="hidden" id="vf-id">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Category</label><select id="vf-category_id" class="form-select"><option value="1">Hatchback</option><option value="2">Sedan</option><option value="3">SUV</option><option value="4">Bikes</option><option value="5">Scooter</option><option value="6">Bike</option><option value="7">Auto Rickshaw</option><option value="8">Mini Truck</option><option value="9">Luxury Cars</option><option value="10">Electric Cars</option><option value="11">Tempo Traveller</option></select></div>
+            <div class="form-group"><label class="form-label">Type</label><select id="vf-type" class="form-select"><option>Hatchback</option><option>Sedan</option><option>SUV</option><option>Bike</option><option>Scooter</option><option>Auto Rickshaw</option><option>Mini Truck</option><option>Luxury Cars</option><option>Electric Cars</option><option>Tempo Traveller</option></select></div>
+          </div>
+          <div class="form-group"><label class="form-label">Name</label><input id="vf-name" class="form-input" placeholder="e.g. Maruti Swift Dzire"></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Brand</label><input id="vf-brand" class="form-input" placeholder="e.g. Maruti"></div>
+            <div class="form-group"><label class="form-label">Model</label><input id="vf-model" class="form-input" placeholder="Swift"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Year</label><input id="vf-year" type="number" class="form-input" value="2024"></div>
+            <div class="form-group"><label class="form-label">Fuel</label><select id="vf-fuel_type" class="form-select"><option>Petrol</option><option>Diesel</option><option>CNG</option><option>Electric</option></select></div>
+            <div class="form-group"><label class="form-label">Transmission</label><select id="vf-transmission" class="form-select"><option>Manual</option><option>Automatic</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Seats</label><input id="vf-seats" type="number" class="form-input" value="5"></div>
+            <div class="form-group"><label class="form-label">Bags</label><input id="vf-bags" type="number" class="form-input" value="2"></div>
+            <div class="form-group"><label class="form-label">Price/Day (₹)</label><input id="vf-price_per_day" type="number" class="form-input" step="0.01"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Price/Km (₹)</label><input id="vf-price_per_km" type="number" class="form-input" step="0.01"></div>
+          <div class="form-group"><label class="form-label">Image URL</label><input id="vf-image" class="form-input" placeholder="https://..."></div>
+          <div class="form-group"><label class="form-label">Description</label><textarea id="vf-description" class="form-input" rows="2"></textarea></div>
+          <div class="form-group"><label class="form-label">Features (pipe | separated)</label><input id="vf-features" class="form-input" placeholder="AC|Power Windows|..."></div>
+          <div class="form-group"><label class="form-label">Inclusions</label><textarea id="vf-inclusions" class="form-input" rows="2"></textarea></div>
+          <div class="form-group"><label class="form-label">Exclusions</label><textarea id="vf-exclusions" class="form-input" rows="2"></textarea></div>
+          <div class="form-group"><label class="form-label">Facilities</label><textarea id="vf-facilities" class="form-input" rows="2"></textarea></div>
+          <div class="form-group"><label class="form-label">Terms</label><textarea id="vf-terms" class="form-input" rows="2"></textarea></div>
+          <div class="form-group"><label class="form-label">Cancellation Policy</label><textarea id="vf-cancellation_policy" class="form-input" rows="2"></textarea></div>
+          <div style="display:flex;gap:1.5rem;">
+            <label class="form-check"><input type="checkbox" id="vf-is_active" checked> Active</label>
+            <label class="form-check"><input type="checkbox" id="vf-is_featured"> Featured</label>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-secondary" onclick="hideModal('vehicle-modal')">Cancel</button>
+          <button class="btn btn-primary" onclick="saveVehicle()"><i class="bi bi-check-circle"></i> Save</button>
+        </div>
+      </div></div>`;
+  } catch(e) { c.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Error</h4><p>' + e.message + '</p></div>'; }
+}
+
+function showVehicleModal(data) {
+  document.getElementById('vf-id').value = data?data.id:'';
+  document.getElementById('vehicle-modal-title').querySelector('span').textContent = data?'Edit Vehicle':'Add Vehicle';
+  document.getElementById('vf-category_id').value = data?data.category_id||1:1;
+  document.getElementById('vf-type').value = data?data.type||'Sedan':'Sedan';
+  document.getElementById('vf-name').value = data?data.name||'':'';
+  document.getElementById('vf-brand').value = data?data.brand||'':'';
+  document.getElementById('vf-model').value = data?data.model||'':'';
+  document.getElementById('vf-year').value = data?data.year||2024:2024;
+  document.getElementById('vf-fuel_type').value = data?data.fuel_type||'Petrol':'Petrol';
+  document.getElementById('vf-transmission').value = data?data.transmission||'Manual':'Manual';
+  document.getElementById('vf-seats').value = data?data.seats||5:5;
+  document.getElementById('vf-bags').value = data?data.bags||2:2;
+  document.getElementById('vf-price_per_day').value = data?data.price_per_day||0:0;
+  document.getElementById('vf-price_per_km').value = data?data.price_per_km||0:0;
+  document.getElementById('vf-image').value = data?data.image||'':'';
+  document.getElementById('vf-description').value = data?data.description||'':'';
+  document.getElementById('vf-features').value = data?data.features||'':'';
+  document.getElementById('vf-inclusions').value = data?data.inclusions||'':'';
+  document.getElementById('vf-exclusions').value = data?data.exclusions||'':'';
+  document.getElementById('vf-facilities').value = data?data.facilities||'':'';
+  document.getElementById('vf-terms').value = data?data.terms||'':'';
+  document.getElementById('vf-cancellation_policy').value = data?data.cancellation_policy||'':'';
+  document.getElementById('vf-is_active').checked = data?data.is_active==1:true;
+  document.getElementById('vf-is_featured').checked = data?data.is_featured==1:false;
+  showModal('vehicle-modal');
+}
+
+async function saveVehicle() {
+  const id = document.getElementById('vf-id').value;
+  const data = {
+    category_id: document.getElementById('vf-category_id').value,
+    type: document.getElementById('vf-type').value,
+    name: document.getElementById('vf-name').value,
+    brand: document.getElementById('vf-brand').value,
+    model: document.getElementById('vf-model').value,
+    year: parseInt(document.getElementById('vf-year').value)||2024,
+    fuel_type: document.getElementById('vf-fuel_type').value,
+    transmission: document.getElementById('vf-transmission').value,
+    seats: parseInt(document.getElementById('vf-seats').value)||5,
+    bags: parseInt(document.getElementById('vf-bags').value)||2,
+    price_per_day: parseFloat(document.getElementById('vf-price_per_day').value)||0,
+    price_per_km: parseFloat(document.getElementById('vf-price_per_km').value)||0,
+    image: document.getElementById('vf-image').value,
+    description: document.getElementById('vf-description').value,
+    features: document.getElementById('vf-features').value,
+    inclusions: document.getElementById('vf-inclusions').value,
+    exclusions: document.getElementById('vf-exclusions').value,
+    facilities: document.getElementById('vf-facilities').value,
+    terms: document.getElementById('vf-terms').value,
+    cancellation_policy: document.getElementById('vf-cancellation_policy').value,
+    is_active: document.getElementById('vf-is_active').checked?1:0,
+    is_featured: document.getElementById('vf-is_featured').checked?1:0
+  };
+  if (id) data.id = id;
+  const action = id ? 'admin/vehicle/update' : 'admin/vehicle/add';
+  const res = await apiPost(action, data);
+  if (res.success) { showToast('Vehicle '+(id?'updated':'added')+'!', 'success'); hideModal('vehicle-modal'); loadVehicles(); }
+  else showToast(res.error||'Failed', 'error');
+}
+
+async function confirmDelete(type, id) {
+  if (!confirm('Delete this '+type+'?')) return;
+  const map = { vehicle: 'admin/vehicle/delete', driver:'admin/driver/delete', category:'admin/category/delete', pricing:'admin/pricing/delete', tour:'admin/tour/delete', coupon:'admin/coupon/delete', banner:'admin/banner/delete', offer:'admin/offer/delete' };
+  const res = await apiPost(map[type], { id });
+  if (res.success) { showToast(type+' deleted', 'success'); window['load'+type.charAt(0).toUpperCase()+type.slice(1)+'s'](); }
+  else showToast(res.error||'Failed', 'error');
+}
+
+let _allVehicles = [];
+function filterVehicles(type, el) {
+  document.querySelectorAll('#vehicle-filters .filter-pill').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const tbody = document.getElementById('vehicles-tbody');
+  if (!tbody) return;
+  const filtered = type ? _allVehicles.filter(v => v.type === type) : _allVehicles;
+  tbody.innerHTML = filtered.map(v => '<tr><td><div style="display:flex;align-items:center;gap:0.5rem;">'+(v.image?'<img src="'+v.image+'" alt="" style="width:44px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">':'<div style="width:44px;height:32px;border-radius:6px;background:var(--bg-input);display:flex;align-items:center;justify-content:center;"><i class="bi bi-car-front" style="color:var(--text-muted);font-size:0.625rem;"></i></div>')+'<div><div class="cell-primary">'+esc(v.name)+'</div><div class="cell-muted">'+esc(v.brand)+' · '+esc(v.model)+'</div></div></div></td><td><span class="badge badge-info">'+esc(v.category_name||v.type)+'</span></td><td>'+v.seats+'</td><td class="cell-primary">'+formatCurrency(v.price_per_day)+'</td><td>'+formatCurrency(v.price_per_km)+'</td><td>'+stars(v.rating)+'</td><td>'+(v.is_active?'<span class="badge badge-active">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+(v.is_featured?' <span class="badge badge-warning"><i class="bi bi-star-fill" style="font-size:0.5rem;"></i></span>':'')+'</td><td><button class="btn btn-ghost btn-xs" onclick="editVehicle('+JSON.stringify(v).replace(/"/g,"'")+')"><i class="bi bi-pencil"></i></button> <button class="btn btn-danger btn-xs" onclick="confirmDelete(\'vehicle\','+v.id+')"><i class="bi bi-trash3"></i></button></td></tr>').join('')||'<tr><td colspan="8"><div class="empty-state"><p>No vehicles</p></div></td></tr>';
+}
+
+async function editVehicle(v) {
+  const data = await apiGet('admin/vehicles');
+  const found = data.find(x => x.id == v.id);
+  showVehicleModal(found||v);
+}
+
+// ===================== DRIVERS =====================
+async function loadDrivers() {
+  const c = document.getElementById('page-content');
+  c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Loading drivers...</div>';
+  try {
+    const d = await apiGet('admin/drivers');
+    c.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <div><span class="cell-primary" style="font-size:0.9375rem;">${d.length||0} Drivers</span></div>
+        <button class="btn btn-primary btn-sm" onclick="showDriverModal()"><i class="bi bi-plus-lg"></i> Add</button>
+      </div>
+      <div class="card"><div class="card-body" style="padding:0;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Driver</th><th>Phone</th><th>License</th><th>Vehicle</th><th>Status</th><th>Rating</th><th>Trips</th><th>Actions</th></tr></thead>
+            <tbody>${d.map(drv => '<tr><td><div><div class="cell-primary">'+esc(drv.name||'')+'</div></div></td><td>'+esc(drv.phone||'')+'</td><td>'+esc(drv.license_number||'')+'</td><td><div class="cell-primary">'+esc(drv.vehicle_model||'')+'</div><div class="cell-muted">'+esc(drv.vehicle_number||'')+'</div></td><td><span class="badge badge-'+(drv.status==='online'?'active':'offline')+'">'+(drv.status||'offline')+'</span></td><td>'+stars(drv.rating)+'</td><td>'+drv.total_trips+'</td><td><button class="btn btn-ghost btn-xs" onclick="showDriverModal('+JSON.stringify(drv).replace(/"/g,"'")+')"><i class="bi bi-pencil"></i></button> <button class="btn btn-danger btn-xs" onclick="confirmDelete(\'driver\','+drv.id+')"><i class="bi bi-trash3"></i></button></td></tr>').join('')}
+            ${!d.length?'<tr><td colspan="8"><div class="empty-state"><i class="bi bi-person-badge"></i><h4>No drivers</h4></div></td></tr>':''}
+            </tbody>
+          </table>
+        </div>
+      </div></div>
+      <div id="driver-modal" class="modal-backdrop"><div class="modal-card">
+        <div class="modal-head"><h3><i class="bi bi-person-badge"></i> <span id="driver-modal-title">Add Driver</span></h3><button class="btn btn-ghost btn-xs" onclick="hideModal('driver-modal')">&times;</button></div>
+        <div class="modal-body">
+          <input type="hidden" id="df-id">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Name</label><input id="df-name" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Phone</label><input id="df-phone" class="form-input"></div>
+          </div>
+          <div class="form-group"><label class="form-label">License Number</label><input id="df-license_number" class="form-input"></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Vehicle Model</label><input id="df-vehicle_model" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Vehicle Number</label><input id="df-vehicle_number" class="form-input"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Status</label><select id="df-status" class="form-select"><option>offline</option><option>online</option><option>busy</option></select></div>
+            <div class="form-group"><label class="form-label">Rating</label><input id="df-rating" type="number" class="form-input" step="0.1" min="0" max="5" value="0"></div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-secondary" onclick="hideModal('driver-modal')">Cancel</button>
+          <button class="btn btn-primary" onclick="saveDriver()"><i class="bi bi-check-circle"></i> Save</button>
+        </div>
+      </div></div>`;
+  } catch(e) { c.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Error</h4><p>' + e.message + '</p></div>'; }
+}
+
+function showDriverModal(data) {
+  document.getElementById('df-id').value = data?data.id:'';
+  document.getElementById('driver-modal-title').textContent = data?'Edit Driver':'Add Driver';
+  document.getElementById('df-name').value = data?data.name||'':'';
+  document.getElementById('df-phone').value = data?data.phone||'':'';
+  document.getElementById('df-license_number').value = data?data.license_number||'':'';
+  document.getElementById('df-vehicle_model').value = data?data.vehicle_model||'':'';
+  document.getElementById('df-vehicle_number').value = data?data.vehicle_number||'':'';
+  document.getElementById('df-status').value = data?data.status||'offline':'offline';
+  document.getElementById('df-rating').value = data?data.rating||0:0;
+  showModal('driver-modal');
+}
+
+async function saveDriver() {
+  const id = document.getElementById('df-id').value;
+  const data = {
+    name: document.getElementById('df-name').value,
+    phone: document.getElementById('df-phone').value,
+    license_number: document.getElementById('df-license_number').value,
+    vehicle_model: document.getElementById('df-vehicle_model').value,
+    vehicle_number: document.getElementById('df-vehicle_number').value,
+    status: document.getElementById('df-status').value,
+    rating: parseFloat(document.getElementById('df-rating').value)||0
+  };
+  if (id) data.id = id;
+  const action = id ? 'admin/driver/update' : 'admin/driver/add';
+  const res = await apiPost(action, data);
+  if (res.success) { showToast('Driver '+(id?'updated':'added')+'!', 'success'); hideModal('driver-modal'); loadDrivers(); }
+  else showToast(res.error||'Failed', 'error');
+}
+
+// ===================== CATEGORIES =====================
+async function loadCategories() {
+  const c = document.getElementById('page-content');
+  try {
+    const cats = await apiGet('admin/categories');
+    c.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <span class="cell-primary" style="font-size:0.9375rem;">${cats.length||0} Categories</span>
+        <button class="btn btn-primary btn-sm" onclick="showCategoryModal()"><i class="bi bi-plus-lg"></i> Add</button>
+      </div>
+      <div class="card"><div class="card-body" style="padding:0;">
+        <div class="table-wrap">
+          <table><thead><tr><th>Name</th><th>Slug</th><th>Sort</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>${cats.map(c => '<tr><td class="cell-primary">'+esc(c.name||'')+'</td><td>'+esc(c.slug||'')+'</td><td>'+c.sort_order+'</td><td>'+(c.active?'<span class="badge badge-active">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td><td><button class="btn btn-ghost btn-xs" onclick="showCategoryModal('+JSON.stringify(c).replace(/"/g,"'")+')"><i class="bi bi-pencil"></i></button> <button class="btn btn-danger btn-xs" onclick="confirmDelete(\'category\','+c.id+')"><i class="bi bi-trash3"></i></button></td></tr>').join('')}</tbody>
+          </table>
+        </div>
+      </div></div>
+      <div id="category-modal" class="modal-backdrop"><div class="modal-card">
+        <div class="modal-head"><h3><i class="bi bi-tags"></i> <span id="category-modal-title">Add Category</span></h3><button class="btn btn-ghost btn-xs" onclick="hideModal('category-modal')">&times;</button></div>
+        <div class="modal-body">
+          <input type="hidden" id="cf-id">
+          <div class="form-group"><label class="form-label">Name</label><input id="cf-name" class="form-input"></div>
+          <div class="form-group"><label class="form-label">Slug</label><input id="cf-slug" class="form-input" placeholder="e.g. sedan"></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Icon</label><input id="cf-icon" class="form-input" placeholder="bi bi-car-front"></div>
+            <div class="form-group"><label class="form-label">Sort Order</label><input id="cf-sort_order" type="number" class="form-input" value="0"></div>
+          </div>
+          <label class="form-check"><input type="checkbox" id="cf-active" checked> Active</label>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-secondary" onclick="hideModal('category-modal')">Cancel</button>
+          <button class="btn btn-primary" onclick="saveCategory()"><i class="bi bi-check-circle"></i> Save</button>
+        </div>
+      </div></div>`;
+  } catch(e) { c.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Error</h4></div>'; }
+}
+
+function showCategoryModal(data) {
+  document.getElementById('cf-id').value = data?data.id:'';
+  document.getElementById('category-modal-title').textContent = data?'Edit Category':'Add Category';
+  document.getElementById('cf-name').value = data?data.name||'':'';
+  document.getElementById('cf-slug').value = data?data.slug||'':'';
+  document.getElementById('cf-icon').value = data?data.icon||'':'';
+  document.getElementById('cf-sort_order').value = data?data.sort_order||0:0;
+  document.getElementById('cf-active').checked = data?data.active==1:true;
+  showModal('category-modal');
+}
+
+async function saveCategory() {
+  const id = document.getElementById('cf-id').value;
+  const data = {
+    name: document.getElementById('cf-name').value,
+    slug: document.getElementById('cf-slug').value,
+    icon: document.getElementById('cf-icon').value,
+    sort_order: parseInt(document.getElementById('cf-sort_order').value)||0,
+    active: document.getElementById('cf-active').checked?1:0
+  };
+  if (id) data.id = id;
+  const action = id ? 'admin/category/update' : 'admin/category/add';
+  const res = await apiPost(action, data);
+  if (res.success) { showToast('Category '+(id?'updated':'added')+'!', 'success'); hideModal('category-modal'); loadCategories(); }
+  else showToast(res.error||'Failed', 'error');
+}
+
+// ===================== BOOKINGS =====================
+async function loadBookings() {
+  const c = document.getElementById('page-content');
+  c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Loading bookings...</div>';
+  try {
+    const b = await apiGet('admin/bookings');
+    c.innerHTML = `
+      <div style="display:flex;gap:0.375rem;flex-wrap:wrap;margin-bottom:1rem;" id="booking-filters">
+        <span class="filter-pill active" onclick="filterBookingsAdmin('',this)">All</span>
+        <span class="filter-pill" onclick="filterBookingsAdmin('pending',this)">Pending</span>
+        <span class="filter-pill" onclick="filterBookingsAdmin('confirmed',this)">Confirmed</span>
+        <span class="filter-pill" onclick="filterBookingsAdmin('completed',this)">Completed</span>
+        <span class="filter-pill" onclick="filterBookingsAdmin('cancelled',this)">Cancelled</span>
+      </div>
+      <div class="card"><div class="card-body" style="padding:0;">
+        <div class="table-wrap">
+          <table><thead><tr><th>Booking</th><th>Customer</th><th>Vehicle</th><th>Pickup</th><th>Fare</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody id="bookings-tbody">${b.map(bk => {
+            const sc = {pending:'warning',confirmed:'info',ongoing:'info',completed:'success',cancelled:'danger'}[bk.status]||'info';
+            return '<tr><td class="cell-primary">#'+esc(bk.booking_ref||bk.id)+'</td><td><div class="cell-primary">'+esc(bk.user_name||'')+'</div><div class="cell-muted">'+esc(bk.user_phone||'')+'</div></td><td>'+esc(bk.vehicle_name||'')+'</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(bk.pickup_location||'')+'</td><td class="cell-primary">'+formatCurrency(bk.total_fare)+'</td><td><span class="badge badge-'+sc+'">'+(bk.status||'')+'</span></td><td style="font-size:0.75rem;color:var(--text-muted);">'+formatDate(bk.created_at)+'</td><td><button class="btn btn-ghost btn-xs" onclick="showBookingActions('+bk.id+',\''+bk.status+'\')"><i class="bi bi-gear"></i></button></td></tr>';
+          }).join('')}
+          ${!b.length?'<tr><td colspan="8"><div class="empty-state"><i class="bi bi-calendar2-check"></i><h4>No bookings</h4></div></td></tr>':''}
+          </tbody></table>
+        </div>
+      </div></div>`;
+    window._allBookings = b;
+  } catch(e) { c.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Error</h4></div>'; }
+}
+
+function filterBookingsAdmin(status, el) {
+  document.querySelectorAll('#booking-filters .filter-pill').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const tbody = document.getElementById('bookings-tbody');
+  if (!tbody) return;
+  const filtered = status ? window._allBookings.filter(b => b.status === status) : window._allBookings;
+  tbody.innerHTML = filtered.map(bk => {
+    const sc = {pending:'warning',confirmed:'info',ongoing:'info',completed:'success',cancelled:'danger'}[bk.status]||'info';
+    return '<tr><td class="cell-primary">#'+esc(bk.booking_ref||bk.id)+'</td><td><div class="cell-primary">'+esc(bk.user_name||'')+'</div><div class="cell-muted">'+esc(bk.user_phone||'')+'</div></td><td>'+esc(bk.vehicle_name||'')+'</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(bk.pickup_location||'')+'</td><td class="cell-primary">'+formatCurrency(bk.total_fare)+'</td><td><span class="badge badge-'+sc+'">'+(bk.status||'')+'</span></td><td style="font-size:0.75rem;color:var(--text-muted);">'+formatDate(bk.created_at)+'</td><td><button class="btn btn-ghost btn-xs" onclick="showBookingActions('+bk.id+',\''+bk.status+'\')"><i class="bi bi-gear"></i></button></td></tr>';
+  }).join('')||'<tr><td colspan="8"><div class="empty-state"><p>No bookings</p></div></td></tr>';
+}
+
+function showBookingActions(id, status) {
+  const actions = ['pending','confirmed','completed','cancelled'];
+  const next = prompt('Update booking #'+id+' status to:\n'+actions.join(', ')+'\n\nCurrent: '+status+'\n\nEnter new status (or leave empty to cancel):');
+  if (!next || !actions.includes(next)) return;
+  apiPost('admin/booking/update', { id, status: next }).then(r => {
+    if (r.success) { showToast('Booking updated!', 'success'); loadBookings(); }
+    else showToast(r.error||'Failed', 'error');
+  });
+}
+
+// ===================== PRICING =====================
+async function loadPricing() {
+  const c = document.getElementById('page-content');
+  c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Loading pricing...</div>';
+  try {
+    const p = await apiGet('admin/pricing');
+    c.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <span class="cell-primary" style="font-size:0.9375rem;">${p.length||0} Packages</span>
+        <button class="btn btn-primary btn-sm" onclick="showPricingModal()"><i class="bi bi-plus-lg"></i> Add</button>
+      </div>
+      <div class="card"><div class="card-body" style="padding:0;">
+        <div class="table-wrap">
+          <table><thead><tr><th>Vehicle</th><th>Label</th><th>Hours</th><th>KMs</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>${p.map(pk => '<tr><td class="cell-primary">'+esc(pk.vehicle_name||'Vehicle #'+pk.vehicle_id)+'</td><td>'+esc(pk.label||'')+'</td><td>'+pk.hours+'</td><td>'+pk.kms+'</td><td class="cell-primary">'+formatCurrency(pk.price)+'</td><td>'+(pk.is_active?'<span class="badge badge-active">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td><td><button class="btn btn-ghost btn-xs" onclick="showPricingModal('+JSON.stringify(pk).replace(/"/g,"'")+')"><i class="bi bi-pencil"></i></button> <button class="btn btn-danger btn-xs" onclick="confirmDelete(\'pricing\','+pk.id+')"><i class="bi bi-trash3"></i></button></td></tr>').join('')}
+            ${!p.length?'<tr><td colspan="7"><div class="empty-state"><i class="bi bi-currency-rupee"></i><h4>No packages</h4></div></td></tr>':''}
+          </tbody></table>
+        </div>
+      </div></div>
+      <div id="pricing-modal" class="modal-backdrop"><div class="modal-card">
+        <div class="modal-head"><h3><i class="bi bi-currency-rupee"></i> <span id="pricing-modal-title">Add Package</span></h3><button class="btn btn-ghost btn-xs" onclick="hideModal('pricing-modal')">&times;</button></div>
+        <div class="modal-body">
+          <input type="hidden" id="pf-id">
+          <div class="form-group"><label class="form-label">Vehicle ID</label><input id="pf-vehicle_id" type="number" class="form-input"></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Label</label><input id="pf-label" class="form-input" placeholder="e.g. 4h/80km"></div>
+            <div class="form-group"><label class="form-label">Hours</label><input id="pf-hours" type="number" class="form-input" value="1"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">KMs</label><input id="pf-kms" type="number" class="form-input" value="0"></div>
+            <div class="form-group"><label class="form-label">Price (₹)</label><input id="pf-price" type="number" class="form-input" step="0.01"></div>
+          </div>
+          <label class="form-check"><input type="checkbox" id="pf-is_active" checked> Active</label>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-secondary" onclick="hideModal('pricing-modal')">Cancel</button>
+          <button class="btn btn-primary" onclick="savePricing()"><i class="bi bi-check-circle"></i> Save</button>
+        </div>
+      </div></div>`;
+  } catch(e) { c.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Error</h4></div>'; }
+}
+
+function showPricingModal(data) {
+  document.getElementById('pf-id').value = data?data.id:'';
+  document.getElementById('pricing-modal-title').textContent = data?'Edit Package':'Add Package';
+  document.getElementById('pf-vehicle_id').value = data?data.vehicle_id||'':'';
+  document.getElementById('pf-label').value = data?data.label||'':'';
+  document.getElementById('pf-hours').value = data?data.hours||1:1;
+  document.getElementById('pf-kms').value = data?data.kms||0:0;
+  document.getElementById('pf-price').value = data?data.price||0:0;
+  document.getElementById('pf-is_active').checked = data?data.is_active==1:true;
+  showModal('pricing-modal');
+}
+
+async function savePricing() {
+  const id = document.getElementById('pf-id').value;
+  const data = {
+    vehicle_id: parseInt(document.getElementById('pf-vehicle_id').value)||0,
+    label: document.getElementById('pf-label').value,
+    hours: parseInt(document.getElementById('pf-hours').value)||1,
+    kms: parseInt(document.getElementById('pf-kms').value)||0,
+    price: parseFloat(document.getElementById('pf-price').value)||0,
+    is_active: document.getElementById('pf-is_active').checked?1:0
+  };
+  if (id) data.id = id;
+  const action = id ? 'admin/pricing/update' : 'admin/pricing/add';
+  const res = await apiPost(action, data);
+  if (res.success) { showToast('Package '+(id?'updated':'added')+'!', 'success'); hideModal('pricing-modal'); loadPricing(); }
+  else showToast(res.error||'Failed', 'error');
+}
+
+// ===================== TOURS =====================
+async function loadTours() {
+  const c = document.getElementById('page-content');
+  c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Loading tours...</div>';
+  try {
+    const t = await apiGet('admin/tours');
+    c.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;"><span class="cell-primary" style="font-size:0.9375rem;">${t.length||0} Tours</span><button class="btn btn-primary btn-sm" onclick="showTourModal()"><i class="bi bi-plus-lg"></i> Add</button></div>
+      <div class="card"><div class="card-body" style="padding:0;">
+        <div class="table-wrap">
+          <table><thead><tr><th>Title</th><th>Destination</th><th>Date</th><th>Price/Person</th><th>Spots</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>${t.map(tk => '<tr><td class="cell-primary">'+esc(tk.title||'')+'</td><td>'+esc(tk.destination||'')+'</td><td style="font-size:0.75rem;">'+formatDate(tk.tour_date)+'</td><td class="cell-primary">'+formatCurrency(tk.price_per_person)+'</td><td>'+(tk.max_participants-tk.current_participants)+'/'+tk.max_participants+'</td><td>'+(tk.is_active?'<span class="badge badge-active">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td><td><button class="btn btn-ghost btn-xs" onclick="showTourModal('+JSON.stringify(tk).replace(/"/g,"'")+')"><i class="bi bi-pencil"></i></button> <button class="btn btn-danger btn-xs" onclick="confirmDelete(\'tour\','+tk.id+')"><i class="bi bi-trash3"></i></button></td></tr>').join('')}
+            ${!t.length?'<tr><td colspan="7"><div class="empty-state"><i class="bi bi-suitcase-lg"></i><h4>No tours</h4></div></td></tr>':''}
+          </tbody></table>
+        </div>
+      </div></div>
+      <div id="tour-modal" class="modal-backdrop"><div class="modal-card">
+        <div class="modal-head"><h3><i class="bi bi-suitcase-lg"></i> <span id="tour-modal-title">Add Tour</span></h3><button class="btn btn-ghost btn-xs" onclick="hideModal('tour-modal')">&times;</button></div>
+        <div class="modal-body">
+          <input type="hidden" id="tf-id">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Title</label><input id="tf-title" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Destination</label><input id="tf-destination" class="form-input"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Tour Date</label><input id="tf-tour_date" type="date" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Return Date</label><input id="tf-return_date" type="date" class="form-input"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Description</label><textarea id="tf-description" class="form-input" rows="2"></textarea></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Vehicle Type</label><input id="tf-vehicle_type" class="form-input" placeholder="SUV"></div>
+            <div class="form-group"><label class="form-label">Price/Person (₹)</label><input id="tf-price_per_person" type="number" class="form-input" step="0.01"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Max Participants</label><input id="tf-max_participants" type="number" class="form-input" value="20"></div>
+            <div class="form-group"><label class="form-label">Current</label><input id="tf-current_participants" type="number" class="form-input" value="0"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Included Items (comma separated)</label><textarea id="tf-included_items" class="form-input" rows="2" placeholder="Breakfast,Lunch,Guide,Entry Fees"></textarea></div>
+          <label class="form-check"><input type="checkbox" id="tf-is_active" checked> Active</label>
+        </div>
+        <div class="modal-foot"><button class="btn btn-secondary" onclick="hideModal('tour-modal')">Cancel</button><button class="btn btn-primary" onclick="saveTour()"><i class="bi bi-check-circle"></i> Save</button></div>
+      </div></div>`;
+  } catch(e) { c.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Error</h4></div>'; }
+}
+
+function showTourModal(data) {
+  document.getElementById('tf-id').value = data?data.id:'';
+  document.getElementById('tour-modal-title').textContent = data?'Edit Tour':'Add Tour';
+  ['title','destination','tour_date','return_date','description','vehicle_type','price_per_person','max_participants','current_participants','included_items'].forEach(f => {
+    const el = document.getElementById('tf-'+f);
+    if (el) el.value = data?data[f]||'':'';
+  });
+  document.getElementById('tf-is_active').checked = data?data.is_active==1:true;
+  showModal('tour-modal');
+}
+
+async function saveTour() {
+  const id = document.getElementById('tf-id').value;
+  const fields = ['title','destination','tour_date','return_date','description','vehicle_type','price_per_person','max_participants','current_participants','included_items'];
+  const data = {};
+  fields.forEach(f => {
+    const el = document.getElementById('tf-'+f);
+    if (el) data[f] = el.value;
+    if (['price_per_person','max_participants','current_participants'].includes(f)) data[f] = parseInt(el.value)||0;
+  });
+  data.is_active = document.getElementById('tf-is_active').checked?1:0;
+  if (id) data.id = id;
+  const action = id ? 'admin/tour/update' : 'admin/tour/add';
+  const res = await apiPost(action, data);
+  if (res.success) { showToast('Tour '+(id?'updated':'added')+'!', 'success'); hideModal('tour-modal'); loadTours(); }
+  else showToast(res.error||'Failed', 'error');
+}
+
+// ===================== ADDONS =====================
+async function loadAddons() {
+  const c = document.getElementById('page-content');
+  c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Loading addons...</div><div class="empty-state"><i class="bi bi-box-seam"></i><h4>Tour Add-ons</h4><p>Manage add-ons for tour packages</p><div class="card" style="margin-top:1rem;text-align:left;max-width:400px;margin-left:auto;margin-right:auto;"><div class="card-body">'+
+    'Add-ons are managed via the tour_addons table. Currently displayed from the database. <br><br>'+
+    'To add/update add-ons, please use the database directly or contact developer. <br><br>'+
+    '<a href="https://app.turso.tech" target="_blank" style="color:var(--primary);">Manage via Turso Dashboard</a></div></div></div>';
+}
+
+// ===================== COUPONS =====================
+async function loadCoupons() {
+  const c = document.getElementById('page-content');
+  c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Loading coupons...</div>';
+  try {
+    const cp = await apiGet('admin/coupons');
+    c.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;"><span class="cell-primary" style="font-size:0.9375rem;">${cp.length||0} Coupons</span><button class="btn btn-primary btn-sm" onclick="showCouponModal()"><i class="bi bi-plus-lg"></i> Add</button></div>
+      <div class="card"><div class="card-body" style="padding:0;">
+        <div class="table-wrap">
+          <table><thead><tr><th>Code</th><th>Discount</th><th>Min Fare</th><th>Max Disc</th><th>Used</th><th>Valid</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>${cp.map(co => '<tr><td class="cell-primary" style="letter-spacing:0.1em;">'+esc(co.code||'')+'</td><td>'+(co.discount_type==='percentage'?co.discount_value+'%':formatCurrency(co.discount_value))+'</td><td>'+formatCurrency(co.min_fare)+'</td><td>'+formatCurrency(co.max_discount)+'</td><td>'+co.used_count+'/'+co.usage_limit+'</td><td style="font-size:0.75rem;">'+formatDate(co.valid_from)+' → '+formatDate(co.valid_until)+'</td><td>'+(co.is_active?'<span class="badge badge-active">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td><td><button class="btn btn-ghost btn-xs" onclick="showCouponModal('+JSON.stringify(co).replace(/"/g,"'")+')"><i class="bi bi-pencil"></i></button> <button class="btn btn-danger btn-xs" onclick="confirmDelete(\'coupon\','+co.id+')"><i class="bi bi-trash3"></i></button></td></tr>').join('')}
+            ${!cp.length?'<tr><td colspan="8"><div class="empty-state"><i class="bi bi-ticket"></i><h4>No coupons</h4></div></td></tr>':''}
+          </tbody></table>
+        </div>
+      </div></div>
+      <div id="coupon-modal" class="modal-backdrop"><div class="modal-card">
+        <div class="modal-head"><h3><i class="bi bi-ticket-perforated"></i> <span id="coupon-modal-title">Add Coupon</span></h3><button class="btn btn-ghost btn-xs" onclick="hideModal('coupon-modal')">&times;</button></div>
+        <div class="modal-body">
+          <input type="hidden" id="coupf-id">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Code</label><input id="coupf-code" class="form-input" placeholder="e.g. SAVE20"></div>
+            <div class="form-group"><label class="form-label">Type</label><select id="coupf-discount_type" class="form-select"><option>percentage</option><option>fixed</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Discount Value</label><input id="coupf-discount_value" type="number" class="form-input" step="0.01"></div>
+            <div class="form-group"><label class="form-label">Min Fare (₹)</label><input id="coupf-min_fare" type="number" class="form-input" step="0.01" value="0"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Max Discount (₹)</label><input id="coupf-max_discount" type="number" class="form-input" step="0.01" value="0"></div>
+            <div class="form-group"><label class="form-label">Usage Limit</label><input id="coupf-usage_limit" type="number" class="form-input" value="100"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Valid From</label><input id="coupf-valid_from" type="date" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Valid Until</label><input id="coupf-valid_until" type="date" class="form-input"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Description</label><textarea id="coupf-description" class="form-input" rows="2"></textarea></div>
+          <label class="form-check"><input type="checkbox" id="coupf-is_active" checked> Active</label>
+        </div>
+        <div class="modal-foot"><button class="btn btn-secondary" onclick="hideModal('coupon-modal')">Cancel</button><button class="btn btn-primary" onclick="saveCoupon()"><i class="bi bi-check-circle"></i> Save</button></div>
+      </div></div>`;
+  } catch(e) { c.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Error</h4></div>'; }
+}
+
+function showCouponModal(data) {
+  document.getElementById('coupf-id').value = data?data.id:'';
+  document.getElementById('coupon-modal-title').textContent = data?'Edit Coupon':'Add Coupon';
+  document.getElementById('coupf-code').value = data?data.code||'':'';
+  document.getElementById('coupf-discount_type').value = data?data.discount_type||'percentage':'percentage';
+  document.getElementById('coupf-discount_value').value = data?data.discount_value||0:0;
+  document.getElementById('coupf-min_fare').value = data?data.min_fare||0:0;
+  document.getElementById('coupf-max_discount').value = data?data.max_discount||0:0;
+  document.getElementById('coupf-usage_limit').value = data?data.usage_limit||100:100;
+  document.getElementById('coupf-valid_from').value = data?data.valid_from||'':'';
+  document.getElementById('coupf-valid_until').value = data?data.valid_until||'':'';
+  document.getElementById('coupf-description').value = data?data.description||'':'';
+  document.getElementById('coupf-is_active').checked = data?data.is_active==1:true;
+  showModal('coupon-modal');
+}
+
+async function saveCoupon() {
+  const id = document.getElementById('coupf-id').value;
+  const data = {
+    code: document.getElementById('coupf-code').value,
+    discount_type: document.getElementById('coupf-discount_type').value,
+    discount_value: parseFloat(document.getElementById('coupf-discount_value').value)||0,
+    min_fare: parseFloat(document.getElementById('coupf-min_fare').value)||0,
+    max_discount: parseFloat(document.getElementById('coupf-max_discount').value)||0,
+    usage_limit: parseInt(document.getElementById('coupf-usage_limit').value)||100,
+    valid_from: document.getElementById('coupf-valid_from').value,
+    valid_until: document.getElementById('coupf-valid_until').value,
+    description: document.getElementById('coupf-description').value,
+    is_active: document.getElementById('coupf-is_active').checked?1:0
+  };
+  if (id) data.id = id;
+  const action = id ? 'admin/coupon/update' : 'admin/coupon/add';
+  const res = await apiPost(action, data);
+  if (res.success) { showToast('Coupon '+(id?'updated':'added')+'!', 'success'); hideModal('coupon-modal'); loadCoupons(); }
+  else showToast(res.error||'Failed', 'error');
+}
+
+// ===================== BANNERS =====================
+async function loadBanners() {
+  const c = document.getElementById('page-content');
+  c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Loading banners...</div>';
+  try {
+    const bn = await apiGet('admin/banners');
+    c.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;"><span class="cell-primary" style="font-size:0.9375rem;">${bn.length||0} Banners</span><button class="btn btn-primary btn-sm" onclick="showBannerModal()"><i class="bi bi-plus-lg"></i> Add</button></div>
+      <div class="card"><div class="card-body" style="padding:0;">
+        <div class="table-wrap">
+          <table><thead><tr><th>Title</th><th>Image</th><th>Sort</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>${bn.map(b => '<tr><td class="cell-primary">'+esc(b.title||'')+'</td><td><span style="font-size:0.6875rem;color:var(--text-muted);">'+(b.image_url?b.image_url.substring(0,40)+'...':'')+'</span></td><td>'+b.sort_order+'</td><td>'+(b.is_active?'<span class="badge badge-active">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td><td><button class="btn btn-ghost btn-xs" onclick="showBannerModal('+JSON.stringify(b).replace(/"/g,"'")+')"><i class="bi bi-pencil"></i></button> <button class="btn btn-danger btn-xs" onclick="confirmDelete(\'banner\','+b.id+')"><i class="bi bi-trash3"></i></button></td></tr>').join('')}
+            ${!bn.length?'<tr><td colspan="5"><div class="empty-state"><i class="bi bi-image"></i><h4>No banners</h4></div></td></tr>':''}
+          </tbody></table>
+        </div>
+      </div></div>
+      <div id="banner-modal" class="modal-backdrop"><div class="modal-card">
+        <div class="modal-head"><h3><i class="bi bi-image"></i> <span id="banner-modal-title">Add Banner</span></h3><button class="btn btn-ghost btn-xs" onclick="hideModal('banner-modal')">&times;</button></div>
+        <div class="modal-body">
+          <input type="hidden" id="bf-id">
+          <div class="form-group"><label class="form-label">Title</label><input id="bf-title" class="form-input"></div>
+          <div class="form-group"><label class="form-label">Image URL</label><input id="bf-image_url" class="form-input" placeholder="https://..."></div>
+          <div class="form-group"><label class="form-label">Link URL</label><input id="bf-link_url" class="form-input" placeholder="https://... or /page"></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Sort Order</label><input id="bf-sort_order" type="number" class="form-input" value="0"></div>
+          </div>
+          <label class="form-check"><input type="checkbox" id="bf-is_active" checked> Active</label>
+        </div>
+        <div class="modal-foot"><button class="btn btn-secondary" onclick="hideModal('banner-modal')">Cancel</button><button class="btn btn-primary" onclick="saveBanner()"><i class="bi bi-check-circle"></i> Save</button></div>
+      </div></div>`;
+  } catch(e) { c.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Error</h4></div>'; }
+}
+
+function showBannerModal(data) {
+  document.getElementById('bf-id').value = data?data.id:'';
+  document.getElementById('banner-modal-title').textContent = data?'Edit Banner':'Add Banner';
+  document.getElementById('bf-title').value = data?data.title||'':'';
+  document.getElementById('bf-image_url').value = data?data.image_url||'':'';
+  document.getElementById('bf-link_url').value = data?data.link_url||'':'';
+  document.getElementById('bf-sort_order').value = data?data.sort_order||0:0;
+  document.getElementById('bf-is_active').checked = data?data.is_active==1:true;
+  showModal('banner-modal');
+}
+
+async function saveBanner() {
+  const id = document.getElementById('bf-id').value;
+  const data = {
+    title: document.getElementById('bf-title').value,
+    image_url: document.getElementById('bf-image_url').value,
+    link_url: document.getElementById('bf-link_url').value,
+    sort_order: parseInt(document.getElementById('bf-sort_order').value)||0,
+    is_active: document.getElementById('bf-is_active').checked?1:0
+  };
+  if (id) data.id = id;
+  const action = id ? 'admin/banner/update' : 'admin/banner/add';
+  const res = await apiPost(action, data);
+  if (res.success) { showToast('Banner '+(id?'updated':'added')+'!', 'success'); hideModal('banner-modal'); loadBanners(); }
+  else showToast(res.error||'Failed', 'error');
+}
+
+// ===================== OFFERS =====================
+async function loadOffers() {
+  const c = document.getElementById('page-content');
+  c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Loading offers...</div>';
+  try {
+    const o = await apiGet('admin/offers');
+    c.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;"><span class="cell-primary" style="font-size:0.9375rem;">${o.length||0} Offers</span><button class="btn btn-primary btn-sm" onclick="showOfferModal()"><i class="bi bi-plus-lg"></i> Add</button></div>
+      <div class="card"><div class="card-body" style="padding:0;">
+        <div class="table-wrap">
+          <table><thead><tr><th>Title</th><th>Discount</th><th>Code</th><th>Valid</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>${o.map(of => '<tr><td class="cell-primary">'+esc(of.title||'')+'</td><td><span class="badge badge-warning">'+(of.discount_percent||0)+'%</span></td><td style="letter-spacing:0.1em;">'+esc(of.code||'')+'</td><td style="font-size:0.75rem;">'+formatDate(of.valid_from)+' → '+formatDate(of.valid_until)+'</td><td>'+(of.is_active?'<span class="badge badge-active">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td><td><button class="btn btn-ghost btn-xs" onclick="showOfferModal('+JSON.stringify(of).replace(/"/g,"'")+')"><i class="bi bi-pencil"></i></button> <button class="btn btn-danger btn-xs" onclick="confirmDelete(\'offer\','+of.id+')"><i class="bi bi-trash3"></i></button></td></tr>').join('')}
+            ${!o.length?'<tr><td colspan="6"><div class="empty-state"><i class="bi bi-percent"></i><h4>No offers</h4></div></td></tr>':''}
+          </tbody></table>
+        </div>
+      </div></div>
+      <div id="offer-modal" class="modal-backdrop"><div class="modal-card">
+        <div class="modal-head"><h3><i class="bi bi-percent"></i> <span id="offer-modal-title">Add Offer</span></h3><button class="btn btn-ghost btn-xs" onclick="hideModal('offer-modal')">&times;</button></div>
+        <div class="modal-body">
+          <input type="hidden" id="off-id">
+          <div class="form-group"><label class="form-label">Title</label><input id="off-title" class="form-input" placeholder="e.g. Monsoon Special"></div>
+          <div class="form-group"><label class="form-label">Description</label><textarea id="off-description" class="form-input" rows="2" placeholder="e.g. 20% off on outstation trips"></textarea></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Discount %</label><input id="off-discount_percent" type="number" class="form-input" value="10"></div>
+            <div class="form-group"><label class="form-label">Coupon Code</label><input id="off-code" class="form-input" placeholder="e.g. MONSOON20"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Valid From</label><input id="off-valid_from" type="date" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Valid Until</label><input id="off-valid_until" type="date" class="form-input"></div>
+          </div>
+          <label class="form-check"><input type="checkbox" id="off-is_active" checked> Active</label>
+        </div>
+        <div class="modal-foot"><button class="btn btn-secondary" onclick="hideModal('offer-modal')">Cancel</button><button class="btn btn-primary" onclick="saveOffer()"><i class="bi bi-check-circle"></i> Save</button></div>
+      </div></div>`;
+  } catch(e) { c.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Error</h4></div>'; }
+}
+
+function showOfferModal(data) {
+  document.getElementById('off-id').value = data?data.id:'';
+  document.getElementById('offer-modal-title').textContent = data?'Edit Offer':'Add Offer';
+  document.getElementById('off-title').value = data?data.title||'':'';
+  document.getElementById('off-description').value = data?data.description||'':'';
+  document.getElementById('off-discount_percent').value = data?data.discount_percent||0:0;
+  document.getElementById('off-code').value = data?data.code||'':'';
+  document.getElementById('off-valid_from').value = data?data.valid_from||'':'';
+  document.getElementById('off-valid_until').value = data?data.valid_until||'':'';
+  document.getElementById('off-is_active').checked = data?data.is_active==1:true;
+  showModal('offer-modal');
+}
+
+async function saveOffer() {
+  const id = document.getElementById('off-id').value;
+  const data = {
+    title: document.getElementById('off-title').value,
+    description: document.getElementById('off-description').value,
+    discount_percent: parseInt(document.getElementById('off-discount_percent').value)||0,
+    code: document.getElementById('off-code').value,
+    valid_from: document.getElementById('off-valid_from').value,
+    valid_until: document.getElementById('off-valid_until').value,
+    is_active: document.getElementById('off-is_active').checked?1:0
+  };
+  if (id) data.id = id;
+  const action = id ? 'admin/offer/update' : 'admin/offer/add';
+  const res = await apiPost(action, data);
+  if (res.success) { showToast('Offer '+(id?'updated':'added')+'!', 'success'); hideModal('offer-modal'); loadOffers(); }
+  else showToast(res.error||'Failed', 'error');
+}
+
+// ===================== SOS =====================
+async function loadSOS() {
+  const c = document.getElementById('page-content');
+  c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Loading SOS alerts...</div>';
+  try {
+    const s = await apiGet('admin/sos');
+    c.innerHTML = `
+      <div class="stats-grid" style="grid-template-columns:repeat(2,1fr);">
+        <div class="stat-card"><div class="stat-value">${s.length||0}</div><div class="stat-label">Total Alerts</div></div>
+        <div class="stat-card"><div class="stat-value">${s.filter(x=>!x.resolved).length||0}</div><div class="stat-label">Active</div></div>
+      </div>
+      <div class="card"><div class="card-body" style="padding:0;">
+        <div class="table-wrap">
+          <table><thead><tr><th>User</th><th>Type</th><th>Message</th><th>Location</th><th>Booking</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody>${s.map(sos => '<tr><td><div class="cell-primary">'+esc(sos.user_name||'')+'</div><div class="cell-muted">'+esc(sos.user_phone||'')+'</div></td><td><span class="badge badge-'+(sos.alert_type==='emergency'?'danger':'warning')+'">'+esc(sos.alert_type||'')+'</span></td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(sos.message||'')+'</td><td style="font-size:0.75rem;">'+(sos.lat?sos.lat+','+sos.lng:'-')+'</td><td>'+(sos.booking_id?'#'+sos.booking_id:'-')+'</td><td style="font-size:0.75rem;color:var(--text-muted);">'+formatDate(sos.created_at)+'</td><td>'+(sos.resolved?'<span class="badge badge-success">Resolved</span>':'<span class="badge badge-danger">Active</span>')+'</td></tr>').join('')}
+            ${!s.length?'<tr><td colspan="7"><div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>No SOS alerts</h4></div></td></tr>':''}
+          </tbody></table>
+        </div>
+      </div></div>`;
+  } catch(e) { c.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Error</h4></div>'; }
+}
+
+console.log('🚗 TripAny Admin loaded');
+</script>
+</body>
+</html>

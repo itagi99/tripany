@@ -7,6 +7,8 @@
     { "src": "/assets/(.*)", "dest": "/vehigo-php/mobile/assets/$1" },
     { "src": "/manifest.json", "dest": "/vehigo-php/mobile/manifest.json" },
     { "src": "/sw.js", "dest": "/vehigo-php/mobile/sw.js" },
+    { "src": "/admin", "dest": "/admin/index.html" },
+    { "src": "/admin/(.*)", "dest": "/admin/index.html" },
     { "src": "/", "dest": "/vehigo-php/mobile/index.html" },
     { "src": "/(.*)", "dest": "/vehigo-php/mobile/$1" }
   ]

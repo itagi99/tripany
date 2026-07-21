@@ -1,0 +1,63 @@
+# =============================================================
+# Hostinger / Apache Configuration for TripAny White-Label
+# =============================================================
+
+# Enable rewrite engine
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Serve static files directly
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # API routing — all /api/* calls go to api/index.php
+  RewriteRule ^api/(.*)$ vehigo-php/api/index.php?action=$1 [QSA,L]
+
+  # Mobile app — serve mobile/index.html for root and all non-file routes
+  RewriteRule ^$ vehigo-php/mobile/index.html [L]
+  RewriteRule ^(?!admin|api|uploads|assets)(.*)$ vehigo-php/mobile/index.html [L]
+
+  # Admin panel — serve admin/index.html (SPA)
+  RewriteRule ^admin$ admin/index.html [L]
+  RewriteRule ^admin/(.*)$ admin/index.html [L]
+
+  # Uploads
+  RewriteRule ^uploads/(.*)$ vehigo-php/uploads/$1 [L]
+
+  # Static assets
+  RewriteRule ^assets/(.*)$ vehigo-php/mobile/assets/$1 [L]
+
+  # PWA files
+  RewriteRule ^manifest.json$ vehigo-php/mobile/manifest.json [L]
+  RewriteRule ^sw.js$ vehigo-php/mobile/sw.js [L]
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "DENY"
+  Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Compress static assets
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# Cache static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpg "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+# Protect sensitive files
+<FilesMatch "\.(json|md|env|sql)$">
+  Require all denied
+</FilesMatch>

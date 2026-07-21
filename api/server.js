@@ -13,6 +13,8 @@ function getDb() {
 
 const ADMIN_TOKENS = new Set();
 const ADMIN_SECRET = process.env.SESSION_SECRET || 'tripany-admin-secret-key';
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
 module.exports = async (req, res) => {
   const db = getDb();
@@ -96,7 +98,7 @@ module.exports = async (req, res) => {
       case 'admin/login': {
         const username = all.username || '';
         const password = all.password || '';
-        if (username === 'admin' && password === 'admin123') {
+        if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
           const token = crypto.randomBytes(32).toString('hex');
           ADMIN_TOKENS.add(token);
           return json({ success: true, token, user: { username: 'admin', role: 'super_admin' } });

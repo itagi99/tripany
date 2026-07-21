@@ -1,0 +1,84 @@
+{
+  "brand": {
+    "name": "TripAny",
+    "shortName": "TripAny",
+    "tagline": "Premium Vehicle Rental",
+    "description": "Premium Vehicle Rental & Travel Booking Platform",
+    "logoText": "T",
+    "copyright": "© 2024 TripAny. All rights reserved.",
+    "year": "2024"
+  },
+  "theme": {
+    "primaryColor": "#38BDF8",
+    "primaryLight": "#7DD3FC",
+    "primaryDark": "#0EA5E9",
+    "secondaryColor": "#BAE6FD",
+    "secondaryDark": "#7DD3FC",
+    "successColor": "#22C55E",
+    "warningColor": "#F59E0B",
+    "dangerColor": "#EF4444",
+    "successLight": "#34D399",
+    "warningLight": "#FBBF24",
+    "dangerLight": "#F87171",
+    "gradient": "linear-gradient(135deg, #38BDF8, #7DD3FC)",
+    "gradientWarm": "linear-gradient(135deg, #FBBF24, #F87171)",
+    "gradientCool": "linear-gradient(135deg, #38BDF8, #7DD3FC)",
+    "gradientSunset": "linear-gradient(135deg, #FCD34D, #7DD3FC)",
+    "gradientDark": "linear-gradient(135deg, #1E293B, #334155)"
+  },
+  "admin": {
+    "title": "TripAny Admin",
+    "sidebarTitle": "TripAny",
+    "sidebarSubtitle": "Fleet Admin",
+    "loginTitle": "Admin Login",
+    "loginSubtitle": "Sign in to manage {brand}",
+    "username": "admin",
+    "password": "admin123",
+    "sessionSecret": "tripany-admin-secret-key"
+  },
+  "contact": {
+    "whatsapp": "919876543210",
+    "whatsappMessage": "Hi {brand}! I need help with booking.",
+    "supportEmail": "support@tripany.com",
+    "phone": "+91 9876543210",
+    "address": ""
+  },
+  "maps": {
+    "apiKey": "AIzaSyBg36zNfvaFGbYsfz5FqN0yIKf5tEY3BBQ"
+  },
+  "defaults": {
+    "location": "Kittur",
+    "pincode": "591115",
+    "serviceArea": ["591115"],
+    "testUser": {
+      "name": "John Doe",
+      "phone": "9876543210",
+      "password": "user123"
+    }
+  },
+  "storage": {
+    "prefix": "tripany",
+    "userKey": "tripany-user",
+    "themeKey": "tripany-theme",
+    "locationKey": "tripany-location",
+    "pincodeKey": "tripany-pincode",
+    "adminTokenKey": "tripany-admin-token"
+  },
+  "seo": {
+    "title": "TripAny — Premium Vehicle Rental",
+    "description": "Book cars, bikes, and vehicles for rent. Safe, fast, and affordable.",
+    "ogImage": ""
+  },
+  "pwa": {
+    "backgroundColor": "#0F172A",
+    "themeColor": "#38BDF8",
+    "iconColor": "#38BDF8"
+  },
+  "database": {
+    "tursoDbName": "tripany-db",
+    "localPath": "vehigo-php/vehigo.db",
+    "mysqlDbName": "tripany",
+    "mysqlUser": "tripany_user",
+    "mysqlPassword": ""
+  }
+}

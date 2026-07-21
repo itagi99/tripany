@@ -47,10 +47,10 @@ body { background:var(--bg-body);display:flex;justify-content:center; }
 <div class="screen active" id="splash-screen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,#0F172A 0%,#1E293B 100%);z-index:999;">
   <div style="text-align:center;padding:2rem;">
     <div style="width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,#38BDF8,#7DD3FC);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;box-shadow:0 0 40px rgba(56,189,248,0.3);animation:pulse 2s ease-in-out infinite;">
-      <span style="color:white;font-size:2.25rem;font-weight:900;">T</span>
+      <span id="splash-logo" style="color:white;font-size:2.25rem;font-weight:900;">T</span>
     </div>
-    <h1 style="font-size:1.75rem;font-weight:900;letter-spacing:-0.02em;color:white;margin:0;">TripAny</h1>
-    <p style="color:rgba(255,255,255,0.5);font-size:0.8125rem;margin:0.375rem 0 2rem;">Premium Vehicle Rental</p>
+    <h1 id="splash-name" style="font-size:1.75rem;font-weight:900;letter-spacing:-0.02em;color:white;margin:0;">TripAny</h1>
+    <p id="splash-tagline" style="color:rgba(255,255,255,0.5);font-size:0.8125rem;margin:0.375rem 0 2rem;">Premium Vehicle Rental</p>
     <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1.5rem;">
       <div style="display:flex;align-items:center;gap:0.375rem;background:rgba(255,255,255,0.08);padding:0.375rem 0.75rem;border-radius:20px;"><i class="bi bi-shield-check" style="color:#38BDF8;font-size:0.75rem;"></i><span style="color:rgba(255,255,255,0.7);font-size:0.625rem;font-weight:600;">Safe</span></div>
       <div style="display:flex;align-items:center;gap:0.375rem;background:rgba(255,255,255,0.08);padding:0.375rem 0.75rem;border-radius:20px;"><i class="bi bi-lightning-charge-fill" style="color:#FBBF24;font-size:0.75rem;"></i><span style="color:rgba(255,255,255,0.7);font-size:0.625rem;font-weight:600;">Fast</span></div>
@@ -66,8 +66,8 @@ body { background:var(--bg-body);display:flex;justify-content:center; }
 <div class="screen" id="login-screen">
   <div style="flex:1;display:flex;flex-direction:column;padding:0 1.5rem 2rem;">
     <div style="padding:1.5rem 0 0;">
-      <div style="width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,#38BDF8,#7DD3FC);display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(56,189,248,0.25);">
-        <span style="color:white;font-size:1.75rem;font-weight:900;">T</span>
+      <div id="login-logo-wrapper" style="width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,#38BDF8,#7DD3FC);display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(56,189,248,0.25);">
+        <span id="login-logo-letter" style="color:white;font-size:1.75rem;font-weight:900;">T</span>
       </div>
     </div>
     <h2 style="font-size:1.75rem;font-weight:800;letter-spacing:-0.02em;color:var(--text);margin:1rem 0 0.25rem;">Welcome Back</h2>
@@ -82,7 +82,7 @@ body { background:var(--bg-body);display:flex;justify-content:center; }
       </div>
     </div>
     <button class="btn btn-primary btn-lg btn-block" onclick="requestOTP()" style="border-radius:16px;margin-top:0.5rem;">Send OTP</button>
-    <button class="btn btn-block" onclick="quickLogin()" style="border-radius:16px;margin-top:0.5rem;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);padding:0.8125rem;font-size:0.8125rem;font-weight:600;"><i class="bi bi-key-fill" style="margin-right:0.375rem;"></i> Test Login (John Doe)</button>
+    <button class="btn btn-block" onclick="quickLogin()" style="border-radius:16px;margin-top:0.5rem;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);padding:0.8125rem;font-size:0.8125rem;font-weight:600;"><i class="bi bi-key-fill" style="margin-right:0.375rem;"></i> <span id="test-login-label">Test Login (John Doe)</span></button>
     <div class="divider" style="margin:1.5rem 0;"><span>or continue with</span></div>
     <button class="btn btn-block" style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:0.8125rem;display:flex;align-items:center;justify-content:center;gap:0.625rem;color:var(--text);margin-bottom:0.75rem;"><svg viewBox="0 0 48 48" style="width:20px;height:20px;"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>Continue with Google</button>
     <button class="btn btn-block" style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:0.8125rem;display:flex;align-items:center;justify-content:center;gap:0.625rem;color:var(--text);"><i class="bi bi-envelope-fill" style="color:#38BDF8;"></i> Continue with Email</button>
@@ -505,7 +505,7 @@ body { background:var(--bg-body);display:flex;justify-content:center; }
     <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;border-radius:10px;cursor:pointer;" onclick="navigateTo('offers-screen')"><i class="bi bi-gift" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">My Offers</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
     <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;border-radius:10px;"><i class="bi bi-moon" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">Dark Mode</span><label class="toggle" style="position:relative;display:inline-block;width:36px;height:20px;"><input type="checkbox" id="theme-toggle" onchange="toggleTheme()" style="opacity:0;width:0;height:0;"><span class="slider" style="position:absolute;inset:0;background:var(--border);border-radius:10px;cursor:pointer;transition:all 0.3s;"></span></label></div>
     <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-headset" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">Help & Support</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
-    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-info-circle" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">About TripAny</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
+    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-info-circle" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span id="about-brand" style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">About TripAny</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
     <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;border-radius:10px;cursor:pointer;margin-top:0.25rem;" onclick="logoutApp()"><i class="bi bi-box-arrow-right" style="width:16px;color:var(--danger);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:600;color:var(--danger);">Logout</span></div>
   </div>
 </div>
@@ -654,12 +654,39 @@ body { background:var(--bg-body);display:flex;justify-content:center; }
 </div><!-- /wrapper -->
 
 <script>
+// ===================== BRAND CONFIG =====================
+// Edit brand.config.json then run: node scripts/setup.js
+var BRAND = {
+  name: 'TripAny',
+  shortName: 'TripAny',
+  tagline: 'Premium Vehicle Rental',
+  logoText: 'T',
+  theme: {
+    primary: '#38BDF8', primaryLight: '#7DD3FC', primaryDark: '#0EA5E9',
+    primaryRgb: '56,189,248',
+    secondary: '#BAE6FD', secondaryRgb: '186,230,253',
+    success: '#34D399', warning: '#FBBF24', danger: '#F87171',
+    gradient: 'linear-gradient(135deg,#38BDF8,#7DD3FC)',
+    gradientWarm: 'linear-gradient(135deg,#FBBF24,#F87171)',
+    gradientCool: 'linear-gradient(135deg,#38BDF8,#7DD3FC)',
+    gradientSunset: 'linear-gradient(135deg,#FCD34D,#7DD3FC)',
+    gradientDark: 'linear-gradient(135deg,#1E293B,#334155)',
+  },
+  contact: { whatsapp: '919876543210', whatsappMsg: 'Hi TripAny! I need help with booking.', supportEmail: 'support@tripany.com', phone: '+91 9876543210' },
+  maps: { apiKey: 'AIzaSyBg36zNfvaFGbYsfz5FqN0yIKf5tEY3BBQ' },
+  defaults: { location: 'Kittur', pincode: '591115', serviceArea: ['591115'], testUser: { name: 'John Doe', phone: '9876543210' } },
+  pwa: { themeColor: '#38BDF8', bgColor: '#0F172A' },
+  storage: { prefix: 'tripany' }
+};
+(function(){var s=document.createElement('style');s.textContent=':root{--primary:'+BRAND.theme.primary+';--primary-light:'+BRAND.theme.primaryLight+';--primary-dark:'+BRAND.theme.primaryDark+';--primary-rgb:'+BRAND.theme.primaryRgb+';--secondary:'+BRAND.theme.secondary+';--secondary-rgb:'+BRAND.theme.secondaryRgb+';--success:'+BRAND.theme.success+';--warning:'+BRAND.theme.warning+';--danger:'+BRAND.theme.danger+';--gradient-primary:'+BRAND.theme.gradient+';}';document.head.appendChild(s);})();
+
 // ===================== APP STATE =====================
 var _debug = true;
-console.log('TripAny script loaded');
+var _P = BRAND.storage.prefix;
+console.log(BRAND.name + ' script loaded');
 const App = {
   currentScreen: 'splash-screen',
-  theme: localStorage.getItem('tripany-theme') || 'light',
+  theme: localStorage.getItem(_P+'-theme') || 'light',
   phoneNumber: '',
   bookingStep: 1,
   maxBookingSteps: 2,
@@ -676,15 +703,15 @@ const App = {
   currentNavigationUrl: '',
   currentFare: null,
   selectedCategory: null,
-  location: 'Kittur',
-  pincode: '591115',
-  serviceArea: ['591115'],
+  location: BRAND.defaults.location,
+  pincode: BRAND.defaults.pincode,
+  serviceArea: BRAND.defaults.serviceArea,
   currentTourId: null,
   currentTour: null,
   tourPersons: 1,
   tourAddons: [],
   tourPayment: 'upi',
-  user: { name: 'John Doe', phone: '9876543210', bookings: 12, wallet: 8500, rating: 4.6 },
+  user: { name: BRAND.defaults.testUser.name, phone: BRAND.defaults.testUser.phone, bookings: 12, wallet: 8500, rating: 4.6 },
   currentLat: null,
   currentLng: null
 };
@@ -899,18 +926,38 @@ async function loadBookingsScreen(filter) {
 
 // ===================== INIT / SPLASH =====================
 document.addEventListener('DOMContentLoaded', function() {
-  var loggedIn = localStorage.getItem('tripany-user');
+  var loggedIn = localStorage.getItem(_P+'-user');
   if (loggedIn) {
-    try { App.user = JSON.parse(loggedIn); } catch(e) { localStorage.removeItem('tripany-user'); }
+    try { App.user = JSON.parse(loggedIn); } catch(e) { localStorage.removeItem(_P+'-user'); }
   }
-  App.theme = localStorage.getItem('tripany-theme') || 'light';
-  App.location = localStorage.getItem('tripany-location') || 'Kittur';
-  App.pincode = localStorage.getItem('tripany-pincode') || '591115';
+  App.theme = localStorage.getItem(_P+'-theme') || 'light';
+  App.location = localStorage.getItem(_P+'-location') || 'Kittur';
+  App.pincode = localStorage.getItem(_P+'-pincode') || '591115';
   document.documentElement.setAttribute('data-theme', App.theme);
   var themeToggle = document.getElementById('theme-toggle');
   if (themeToggle) themeToggle.checked = App.theme === 'dark';
   var locEl = document.getElementById('home-location-name');
   if (locEl) locEl.textContent = App.location + ', ' + App.pincode;
+
+  // Apply brand config to UI
+  try {
+    var els = {
+      'splash-name': function(e){ e.textContent = BRAND.name; },
+      'splash-tagline': function(e){ e.textContent = BRAND.tagline; },
+      'splash-logo': function(e){ e.textContent = BRAND.logoText; },
+      'login-logo-letter': function(e){ e.textContent = BRAND.logoText; },
+      'about-brand': function(e){ e.textContent = 'About ' + BRAND.name; },
+      'test-login-label': function(e){ e.textContent = 'Test Login (' + (BRAND.defaults.testUser ? BRAND.defaults.testUser.name : 'User') + ')'; },
+    };
+    Object.keys(els).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) els[id](el);
+    });
+    document.title = BRAND.seo ? (BRAND.seo.title || BRAND.name + ' — ' + BRAND.tagline) : BRAND.name + ' — ' + BRAND.tagline;
+    // Apply brand gradients to logo wrappers
+    var logoWraps = document.querySelectorAll('[id$="-logo-wrapper"], #splash-screen [style*="border-radius:24px"]');
+    for (var i = 0; i < logoWraps.length; i++) logoWraps[i].style.background = BRAND.theme.gradient;
+  } catch(e) {}
 
   var bar = document.getElementById('splash-progress');
   if (bar) setTimeout(function() { bar.style.width = '100%'; }, 100);
@@ -940,7 +987,7 @@ function hideSplash(loggedIn) {
 // ===================== QUICK LOGIN BYPASS =====================
 function quickLogin() {
   App.user = { id: 2, name: 'John Doe', phone: '9876543210', bookings: 12, wallet: 8500, rating: 4.6 };
-  localStorage.setItem('tripany-user', JSON.stringify(App.user));
+  localStorage.setItem(_P+'-user', JSON.stringify(App.user));
   showToast('Logged in as John Doe', 'success');
   navigateTo('home-screen');
 }
@@ -1019,8 +1066,8 @@ async function verifyOTP() {
     const res = await apiPost('auth/verify', { phone: App.phoneNumber, otp });
     if (res.success) {
       App.user = res.user;
-      localStorage.setItem('tripany-user', JSON.stringify(res.user));
-      showToast('Welcome to TripAny!', 'success');
+      localStorage.setItem(_P+'-user', JSON.stringify(res.user));
+      showToast('Welcome to ' + BRAND.name + '!', 'success');
       navigateTo('home-screen');
     } else {
       showToast('Invalid OTP', 'error');
@@ -1149,7 +1196,7 @@ async function confirmBooking() {
 function toggleTheme() {
   App.theme = App.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', App.theme);
-  localStorage.setItem('tripany-theme', App.theme);
+  localStorage.setItem(_P+'-theme', App.theme);
 }
 
 // ===================== TOAST =====================
@@ -1246,7 +1293,7 @@ async function loadOffersScreen() {
 // ===================== LOGOUT =====================
 function logoutApp() {
   if (!confirm('Are you sure you want to logout?')) return;
-  localStorage.removeItem('tripany-user');
+  localStorage.removeItem(_P+'-user');
   App.user = null;
   navigateTo('login-screen');
   document.querySelector('.bottom-nav').style.display = 'none';
@@ -1390,7 +1437,7 @@ function openNavigation() {
 function shareNavigationLink() {
   if (App.currentNavigationUrl) {
     if (navigator.share) {
-      navigator.share({ title: 'TripAny Trip', text: 'Track my trip live!', url: App.currentNavigationUrl });
+      navigator.share({ title: BRAND.name + ' Trip', text: 'Track my trip live!', url: App.currentNavigationUrl });
     } else {
       navigator.clipboard.writeText(App.currentNavigationUrl);
       showToast('Link copied!', 'success');
@@ -1411,7 +1458,7 @@ document.querySelectorAll('.scroll-x').forEach(el => {
 
 // ===================== SOS EMERGENCY =====================
 function sendSOS() {
-  if (!confirm('🚨 Send emergency alert to TripAny admin?')) return;
+  if (!confirm('🚨 Send emergency alert to ' + BRAND.name + ' admin?')) return;
   fetch('/api/index.php?action=sos/create', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -1767,7 +1814,7 @@ function useCurrentLocation() {
           var locEl = document.getElementById('home-location-name');
           if (locEl) locEl.textContent = locName;
           App.location = locName;
-          localStorage.setItem('tripany-location', locName);
+          localStorage.setItem(_P+'-location', locName);
           closeLocationModal();
           showToast('Location set to ' + locName, 'success');
         }
@@ -1783,8 +1830,8 @@ function closeLocationModal() {
 function changeLocation(name, pincode) {
   App.location = name;
   App.pincode = pincode;
-  localStorage.setItem('tripany-location', name);
-  localStorage.setItem('tripany-pincode', pincode);
+  localStorage.setItem(_P+'-location', name);
+  localStorage.setItem(_P+'-pincode', pincode);
   var locEl = document.getElementById('home-location-name');
   if (locEl) locEl.textContent = name + ', ' + pincode;
   closeLocationModal();
@@ -2097,7 +2144,7 @@ quickLogin = function() {
 
 // Also poll when DOM is ready if already logged in
 document.addEventListener('DOMContentLoaded', function() {
-  var loggedIn = localStorage.getItem('tripany-user');
+  var loggedIn = localStorage.getItem(_P+'-user');
   if (loggedIn) {
     setTimeout(function() {
       pollNotifications();
@@ -2108,8 +2155,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ── Floating WhatsApp Button ──
 (function() {
-  const WHATSAPP_NUMBER = '919876543210'; // Change this number (country code + number, no + sign)
-  const WHATSAPP_MSG = encodeURIComponent('Hi TripAny! I need help with booking.');
+  const WHATSAPP_NUMBER = BRAND.contact.whatsapp;
+  const WHATSAPP_MSG = encodeURIComponent(BRAND.contact.whatsappMsg);
   const btn = document.createElement('a');
   btn.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + WHATSAPP_MSG;
   btn.target = '_blank';
@@ -2124,7 +2171,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.head.appendChild(style);
 })();
 
-console.log('🚗 TripAny — Premium Vehicle Rental App');
+console.log('🚗 ' + BRAND.name + ' — ' + BRAND.tagline + ' App');
 console.log('Theme:', App.theme, '| User:', App.user.name);
 </script>
 </body>

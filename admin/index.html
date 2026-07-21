@@ -210,9 +210,9 @@ textarea.form-input{min-height:80px;resize:vertical;}
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-logo">T</div>
-    <div><div class="sidebar-brand-name">TripAny</div><div class="sidebar-brand-sub">Fleet Admin</div></div>
+<div class="sidebar-header">
+    <a class="sidebar-logo" onclick="switchPage('dashboard',null)">T</a>
+    <div><div class="sidebar-brand-name" id="sidebar-brand-name">TripAny</div><div class="sidebar-brand-sub" id="sidebar-brand-sub">Fleet Admin</div></div>
   </div>
   <nav class="sidebar-nav">
     <div class="sidebar-section"><div class="sidebar-section-label">Main</div>
@@ -260,20 +260,53 @@ textarea.form-input{min-height:80px;resize:vertical;}
 
 <script>
 const API = '/api/index.php';
-let ADMIN_TOKEN = localStorage.getItem('tripany-admin-token') || '';
+// ===================== BRAND CONFIG =====================
+// Edit brand.config.json then run: node scripts/setup.js
+var BRAND = {
+  name: 'TripAny',
+  title: 'TripAny Admin',
+  sidebarTitle: 'TripAny',
+  sidebarSubtitle: 'Fleet Admin',
+  loginTitle: 'Admin Login',
+  loginSubtitle: 'Sign in to manage {brand}',
+  logoText: 'T',
+  theme: {
+    primary: '#38BDF8', primaryLight: '#7DD3FC', primaryDark: '#0EA5E9',
+    primaryRgb: '56,189,248',
+    secondary: '#BAE6FD', secondaryRgb: '186,230,253',
+    success: '#22C55E', warning: '#F59E0B', danger: '#EF4444',
+    gradient: 'linear-gradient(135deg,#38BDF8,#7DD3FC)',
+  },
+  defaults: { testUser: { name: 'John Doe', phone: '9876543210' } },
+  contact: { supportEmail: 'support@tripany.com' },
+  storage: { adminTokenKey: 'tripany-admin-token', themeKey: 'admin-theme' }
+};
+(function(){var s=document.createElement('style');s.textContent=':root{--primary:'+BRAND.theme.primary+';--primary-hover:'+BRAND.theme.primaryDark+';--primary-light:'+BRAND.theme.primaryLight+';--primary-rgb:'+BRAND.theme.primaryRgb+';--secondary:'+BRAND.theme.secondary+';--secondary-rgb:'+BRAND.theme.secondaryRgb+';--success:'+BRAND.theme.success+';--warning:'+BRAND.theme.warning+';--danger:'+BRAND.theme.danger+';--gradient-primary:'+BRAND.theme.gradient+';}';document.head.appendChild(s);})();
+
+let ADMIN_TOKEN = localStorage.getItem(BRAND.storage.adminTokenKey) || '';
 
 function toggleTheme() {
   const html = document.documentElement;
   const cur = html.getAttribute('data-theme');
   const next = cur === 'dark' ? 'light' : 'dark';
   html.setAttribute('data-theme', next);
-  localStorage.setItem('admin-theme', next);
+  localStorage.setItem(BRAND.storage.themeKey, next);
   document.getElementById('theme-icon').className = 'bi ' + (next === 'dark' ? 'bi-sun-fill' : 'bi-moon-fill');
 }
 (function() {
-  const saved = localStorage.getItem('admin-theme') || 'light';
+  const saved = localStorage.getItem(BRAND.storage.themeKey) || 'light';
   document.documentElement.setAttribute('data-theme', saved);
   document.getElementById('theme-icon').className = 'bi ' + (saved === 'dark' ? 'bi-sun-fill' : 'bi-moon-fill');
+  // Apply brand name to all branded elements
+  document.title = BRAND.title;
+  document.querySelector('.sidebar-logo').textContent = BRAND.logoText;
+  document.getElementById('sidebar-brand-name').textContent = BRAND.sidebarTitle;
+  document.getElementById('sidebar-brand-sub').textContent = BRAND.sidebarSubtitle;
+  document.querySelector('#page-title').textContent = 'Dashboard';
+  const loginTitle = document.querySelector('.login-card h2');
+  const loginSub = document.querySelector('.login-card p');
+  if (loginTitle) loginTitle.textContent = BRAND.loginTitle;
+  if (loginSub) loginSub.textContent = BRAND.loginSubtitle.replace('{brand}', BRAND.name);
 })();
 
 async function apiCall(action, data, method) {
@@ -308,7 +341,7 @@ async function adminLogin() {
     const res = await apiPost('admin/login', { username, password });
     if (res.success && res.token) {
       ADMIN_TOKEN = res.token;
-      localStorage.setItem('tripany-admin-token', res.token);
+      localStorage.setItem(BRAND.storage.adminTokenKey, res.token);
       document.getElementById('login-page').style.display = 'none';
       showToast('Welcome Admin!', 'success');
       switchPage('dashboard');
@@ -320,7 +353,7 @@ async function adminLogin() {
 }
 
 function adminLogout() {
-  localStorage.removeItem('tripany-admin-token');
+  localStorage.removeItem(BRAND.storage.adminTokenKey);
   ADMIN_TOKEN = '';
   document.getElementById('login-page').style.display = 'flex';
   showToast('Logged out', 'success');
@@ -354,7 +387,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const res = await apiPost('admin/verify');
       if (res.success) { document.getElementById('login-page').style.display = 'none'; switchPage('dashboard'); return; }
     } catch(e) {}
-    localStorage.removeItem('tripany-admin-token');
+    localStorage.removeItem(BRAND.storage.adminTokenKey);
     ADMIN_TOKEN = '';
   }
 });

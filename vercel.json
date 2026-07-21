@@ -2,7 +2,11 @@
   "version": 2,
   "routes": [
     { "src": "/api/index.php", "dest": "/api/server" },
+    { "src": "/api/(.*)", "dest": "/api/server" },
     { "src": "/uploads/(.*)", "dest": "/vehigo-php/uploads/$1" },
+    { "src": "/assets/(.*)", "dest": "/vehigo-php/mobile/assets/$1" },
+    { "src": "/manifest.json", "dest": "/vehigo-php/mobile/manifest.json" },
+    { "src": "/sw.js", "dest": "/vehigo-php/mobile/sw.js" },
     { "src": "/", "dest": "/vehigo-php/mobile/index.html" },
     { "src": "/(.*)", "dest": "/vehigo-php/mobile/$1" }
   ]

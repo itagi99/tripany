@@ -1,24 +1,20 @@
 {
   "name": "vehigo",
   "version": "1.0.0",
-  "description": "VehiGo - On-demand vehicle rental PWA",
-  "main": "server/index.js",
+  "description": "TripAny - Vehicle Rental PWA",
   "scripts": {
     "start": "node server/index.js",
     "dev": "node server/index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@libsql/client": "^0.17.4",
-    "bcryptjs": "^3.0.3",
+    "@libsql/client": "^0.17.4"
+  },
+  "devDependencies": {
     "better-sqlite3": "^12.11.1",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "express-session": "^1.19.0",
+    "cors": "^2.8.6",
+    "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0"
   }

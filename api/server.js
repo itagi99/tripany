@@ -289,7 +289,6 @@ const handler = async (req, res) => {
   }
 };
 
-app.all('/api/index.php', handler);
-app.all('/', handler);
+app.all('*', handler);
 
 module.exports = app;

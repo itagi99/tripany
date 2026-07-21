@@ -535,7 +535,7 @@ async function saveVehicle() {
 
 async function confirmDelete(type, id) {
   if (!confirm('Delete this '+type+'?')) return;
-  const map = { vehicle: 'admin/vehicle/delete', driver:'admin/driver/delete', category:'admin/category/delete', pricing:'admin/pricing/delete', tour:'admin/tour/delete', coupon:'admin/coupon/delete', banner:'admin/banner/delete', offer:'admin/offer/delete' };
+  const map = { vehicle: 'admin/vehicle/delete', driver:'admin/driver/delete', category:'admin/category/delete', pricing:'admin/pricing/delete', tour:'admin/tour/delete', coupon:'admin/coupon/delete', banner:'admin/banner/delete', offer:'admin/offer/delete', addon:'admin/addon/delete' };
   const res = await apiPost(map[type], { id });
   if (res.success) { showToast(type+' deleted', 'success'); window['load'+type.charAt(0).toUpperCase()+type.slice(1)+'s'](); }
   else showToast(res.error||'Failed', 'error');
@@ -897,10 +897,59 @@ async function saveTour() {
 // ===================== ADDONS =====================
 async function loadAddons() {
   const c = document.getElementById('page-content');
-  c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Loading addons...</div><div class="empty-state"><i class="bi bi-box-seam"></i><h4>Tour Add-ons</h4><p>Manage add-ons for tour packages</p><div class="card" style="margin-top:1rem;text-align:left;max-width:400px;margin-left:auto;margin-right:auto;"><div class="card-body">'+
-    'Add-ons are managed via the tour_addons table. Currently displayed from the database. <br><br>'+
-    'To add/update add-ons, please use the database directly or contact developer. <br><br>'+
-    '<a href="https://app.turso.tech" target="_blank" style="color:var(--primary);">Manage via Turso Dashboard</a></div></div></div>';
+  c.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">Loading addons...</div>';
+  try {
+    const ad = await apiGet('admin/addons');
+    c.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;"><span class="cell-primary" style="font-size:0.9375rem;">${ad.length||0} Add-ons</span><button class="btn btn-primary btn-sm" onclick="showAddonModal()"><i class="bi bi-plus-lg"></i> Add</button></div>
+      <div class="card"><div class="card-body" style="padding:0;">
+        <div class="table-wrap">
+          <table><thead><tr><th>Icon</th><th>Name</th><th>Description</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>${ad.map(a => '<tr><td style="font-size:1.25rem;">'+esc(a.icon||'📦')+'</td><td class="cell-primary">'+esc(a.name||'')+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary);font-size:0.75rem;">'+esc(a.description||'')+'</td><td>'+formatCurrency(a.price)+'</td><td>'+(a.is_active?'<span class="badge badge-active">Active</span>':'<span class="badge badge-inactive">Inactive</span>')+'</td><td><button class="btn btn-ghost btn-xs" onclick="showAddonModal('+JSON.stringify(a).replace(/"/g,"'")+')"><i class="bi bi-pencil"></i></button> <button class="btn btn-danger btn-xs" onclick="confirmDelete(\'addon\','+a.id+')"><i class="bi bi-trash3"></i></button></td></tr>').join('')}
+            ${!ad.length?'<tr><td colspan="6"><div class="empty-state"><i class="bi bi-box-seam"></i><h4>No add-ons</h4></div></td></tr>':''}
+          </tbody></table>
+        </div>
+      </div></div>
+      <div id="addon-modal" class="modal-backdrop"><div class="modal-card">
+        <div class="modal-head"><h3><i class="bi bi-box-seam"></i> <span id="addon-modal-title">Add Add-on</span></h3><button class="btn btn-ghost btn-xs" onclick="hideModal('addon-modal')">&times;</button></div>
+        <div class="modal-body">
+          <input type="hidden" id="addon-id">
+          <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="addon-name" placeholder="e.g. Travel Insurance"></div>
+          <div class="form-group"><label class="form-label">Icon (emoji)</label><input class="form-input" id="addon-icon" placeholder="📦" style="font-size:1.25rem;"></div>
+          <div class="form-group"><label class="form-label">Price (₹)</label><input class="form-input" id="addon-price" type="number" step="0.01" min="0" placeholder="0"></div>
+          <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" id="addon-desc" rows="3" placeholder="Describe the add-on"></textarea></div>
+          <div class="form-group"><label class="form-check"><input type="checkbox" id="addon-active" checked> Active</label></div>
+        </div>
+        <div class="modal-foot"><button class="btn btn-ghost" onclick="hideModal('addon-modal')">Cancel</button><button class="btn btn-primary" onclick="saveAddon()">Save</button></div>
+      </div></div>`;
+  } catch(e) { c.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Error loading add-ons</h4></div>'; }
+}
+
+function showAddonModal(data) {
+  document.getElementById('addon-modal-title').textContent = data ? 'Edit Add-on' : 'Add Add-on';
+  document.getElementById('addon-id').value = data ? data.id : '';
+  document.getElementById('addon-name').value = data ? (data.name||'') : '';
+  document.getElementById('addon-icon').value = data ? (data.icon||'📦') : '📦';
+  document.getElementById('addon-price').value = data ? (data.price||0) : '';
+  document.getElementById('addon-desc').value = data ? (data.description||'') : '';
+  document.getElementById('addon-active').checked = data ? !!data.is_active : true;
+  document.getElementById('addon-modal').style.display = 'flex';
+}
+
+async function saveAddon() {
+  const id = document.getElementById('addon-id').value;
+  const data = {
+    name: document.getElementById('addon-name').value,
+    icon: document.getElementById('addon-icon').value || '📦',
+    price: parseFloat(document.getElementById('addon-price').value) || 0,
+    description: document.getElementById('addon-desc').value,
+    is_active: document.getElementById('addon-active').checked ? 1 : 0
+  };
+  if (!data.name) { showToast('Name is required', 'error'); return; }
+  const action = id ? 'admin/addon/update' : 'admin/addon/add';
+  if (id) data.id = id;
+  const res = await apiPost(action, data);
+  if (res.success) { showToast('Add-on '+(id?'updated':'added')+'!', 'success'); hideModal('addon-modal'); loadAddons(); }
 }
 
 // ===================== COUPONS =====================

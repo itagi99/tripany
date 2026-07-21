@@ -419,7 +419,7 @@ module.exports = async (req, res) => {
           sql: "SELECT b.*, u.name as user_name, v.name as vehicle_name FROM bookings b LEFT JOIN users u ON b.user_id = u.id LEFT JOIN vehicles v ON b.vehicle_id = v.id ORDER BY b.created_at DESC LIMIT 5"
         })).rows;
         const topDrivers = (await db.execute({ sql: "SELECT * FROM drivers ORDER BY rating DESC LIMIT 3" })).rows;
-        const sosAlerts = (await db.execute({ sql: "SELECT COUNT(*) as c FROM sos_alerts WHERE resolved=0" })).rows[0].c;
+        const sosAlerts = (await db.execute({ sql: "SELECT COUNT(*) as c FROM sos_alerts WHERE status='pending'" })).rows[0].c;
         return json({
           totalBookings, totalRevenue, activeDrivers, totalUsers, totalVehicles,
           pendingBookings, recentBookings, topDrivers, sosAlerts
@@ -463,6 +463,36 @@ module.exports = async (req, res) => {
 
       case 'addons/list': {
         return json((await db.execute({ sql: "SELECT * FROM tour_addons WHERE is_active=1 ORDER BY name ASC" })).rows);
+      }
+
+      case 'admin/addons': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        return json((await db.execute({ sql: "SELECT * FROM tour_addons ORDER BY name ASC" })).rows);
+      }
+
+      case 'admin/addon/add': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const r = await db.execute({
+          sql: "INSERT INTO tour_addons (name,description,icon,price,is_active) VALUES (?,?,?,?,?)",
+          args: [all.name||'', all.description||'', all.icon||'📦', all.price||0, all.is_active?1:0]
+        });
+        return json({ success: true, id: Number(r.lastInsertRowid) });
+      }
+
+      case 'admin/addon/update': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing addon id');
+        await db.execute({ sql: "UPDATE tour_addons SET name=?,description=?,icon=?,price=?,is_active=? WHERE id=?", args: [all.name||'', all.description||'', all.icon||'📦', all.price||0, all.is_active?1:0, id] });
+        return json({ success: true });
+      }
+
+      case 'admin/addon/delete': {
+        if (!verifyAdmin()) return err('Unauthorized', 401);
+        const id = parseInt(all.id) || 0;
+        if (!id) return err('Missing addon id');
+        await db.execute({ sql: "DELETE FROM tour_addons WHERE id=?", args: [id] });
+        return json({ success: true });
       }
 
       case 'tours/list': {

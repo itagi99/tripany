@@ -9,7 +9,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>TripAny — Premium Vehicle Rental</title>
+<title id="page-title">TripAny — Premium Vehicle Rental</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 <link href="assets/app.css" rel="stylesheet">
@@ -46,7 +46,7 @@ body { background:var(--bg-body);display:flex;justify-content:center; }
 <!-- SPLASH -->
 <div class="screen active" id="splash-screen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,#0F172A 0%,#1E293B 100%);z-index:999;">
   <div style="text-align:center;padding:2rem;">
-    <div style="width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,#38BDF8,#7DD3FC);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;box-shadow:0 0 40px rgba(56,189,248,0.3);animation:pulse 2s ease-in-out infinite;">
+    <div id="splash-logo-e" style="width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,#38BDF8,#7DD3FC);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;box-shadow:0 0 40px rgba(56,189,248,0.3);animation:pulse 2s ease-in-out infinite;">
       <span id="splash-logo" style="color:white;font-size:2.25rem;font-weight:900;">T</span>
     </div>
     <h1 id="splash-name" style="font-size:1.75rem;font-weight:900;letter-spacing:-0.02em;color:white;margin:0;">TripAny</h1>
@@ -66,8 +66,8 @@ body { background:var(--bg-body);display:flex;justify-content:center; }
 <div class="screen" id="login-screen">
   <div style="flex:1;display:flex;flex-direction:column;padding:0 1.5rem 2rem;">
     <div style="padding:1.5rem 0 0;">
-      <div id="login-logo-wrapper" style="width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,#38BDF8,#7DD3FC);display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(56,189,248,0.25);">
-        <span id="login-logo-letter" style="color:white;font-size:1.75rem;font-weight:900;">T</span>
+      <div id="welcome-logo-c" style="width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,#38BDF8,#7DD3FC);display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(56,189,248,0.25);">
+        <span id="welcome-logo" style="color:white;font-size:1.75rem;font-weight:900;">T</span>
       </div>
     </div>
     <h2 style="font-size:1.75rem;font-weight:800;letter-spacing:-0.02em;color:var(--text);margin:1rem 0 0.25rem;">Welcome Back</h2>
@@ -505,7 +505,7 @@ body { background:var(--bg-body);display:flex;justify-content:center; }
     <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;border-radius:10px;cursor:pointer;" onclick="navigateTo('offers-screen')"><i class="bi bi-gift" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">My Offers</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
     <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;border-radius:10px;"><i class="bi bi-moon" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">Dark Mode</span><label class="toggle" style="position:relative;display:inline-block;width:36px;height:20px;"><input type="checkbox" id="theme-toggle" onchange="toggleTheme()" style="opacity:0;width:0;height:0;"><span class="slider" style="position:absolute;inset:0;background:var(--border);border-radius:10px;cursor:pointer;transition:all 0.3s;"></span></label></div>
     <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-headset" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">Help & Support</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
-    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-info-circle" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span id="about-brand" style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">About TripAny</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
+    <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;border-radius:10px;cursor:pointer;"><i class="bi bi-info-circle" style="width:16px;color:var(--text-muted);font-size:0.8125rem;"></i><span id="about-brand" style="flex:1;font-size:0.75rem;font-weight:500;color:var(--text);">About</span><i class="bi bi-chevron-right" style="color:var(--text-muted);font-size:0.625rem;"></i></div>
     <div class="profile-item" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;border-radius:10px;cursor:pointer;margin-top:0.25rem;" onclick="logoutApp()"><i class="bi bi-box-arrow-right" style="width:16px;color:var(--danger);font-size:0.8125rem;"></i><span style="flex:1;font-size:0.75rem;font-weight:600;color:var(--danger);">Logout</span></div>
   </div>
 </div>
@@ -654,16 +654,12 @@ body { background:var(--bg-body);display:flex;justify-content:center; }
 </div><!-- /wrapper -->
 
 <script>
-// ===================== BRAND CONFIG =====================
-// Edit brand.config.json then run: node scripts/setup.js
+// ===================== BRAND CONFIG (whitelabel) =====================
+// Edit brand.config.json to rebrand — or customers run: node scripts/setup.js
 var BRAND = {
-  name: 'TripAny',
-  shortName: 'TripAny',
-  tagline: 'Premium Vehicle Rental',
-  logoText: 'T',
+  name: 'TripAny', shortName: 'TripAny', tagline: 'Premium Vehicle Rental', logoText: 'T',
   theme: {
-    primary: '#38BDF8', primaryLight: '#7DD3FC', primaryDark: '#0EA5E9',
-    primaryRgb: '56,189,248',
+    primary: '#38BDF8', primaryLight: '#7DD3FC', primaryDark: '#0EA5E9', primaryRgb: '56,189,248',
     secondary: '#BAE6FD', secondaryRgb: '186,230,253',
     success: '#34D399', warning: '#FBBF24', danger: '#F87171',
     gradient: 'linear-gradient(135deg,#38BDF8,#7DD3FC)',
@@ -678,7 +674,30 @@ var BRAND = {
   pwa: { themeColor: '#38BDF8', bgColor: '#0F172A' },
   storage: { prefix: 'tripany' }
 };
+// Apply theme CSS vars
 (function(){var s=document.createElement('style');s.textContent=':root{--primary:'+BRAND.theme.primary+';--primary-light:'+BRAND.theme.primaryLight+';--primary-dark:'+BRAND.theme.primaryDark+';--primary-rgb:'+BRAND.theme.primaryRgb+';--secondary:'+BRAND.theme.secondary+';--secondary-rgb:'+BRAND.theme.secondaryRgb+';--success:'+BRAND.theme.success+';--warning:'+BRAND.theme.warning+';--danger:'+BRAND.theme.danger+';--gradient-primary:'+BRAND.theme.gradient+';}';document.head.appendChild(s);})();
+// Load brand.config.json at runtime to override defaults
+(function(){var x=new XMLHttpRequest();x.open('GET','/brand.config.json',true);x.onload=function(){if(x.status===200){try{var c=JSON.parse(x.responseText);if(c.brand){Object.assign(BRAND,c.brand)}if(c.theme){Object.assign(BRAND.theme,c.theme)}if(c.contact){Object.assign(BRAND.contact,c.contact)}if(c.maps){Object.assign(BRAND.maps,c.maps)}if(c.defaults){Object.assign(BRAND.defaults,c.defaults)}if(c.pwa){Object.assign(BRAND.pwa,c.pwa)}if(c.storage){Object.assign(BRAND.storage,c.storage)}applyBrand();}catch(e){}}});x.send();})();
+function applyBrand(){
+  // Title
+  var t=document.getElementById('page-title');if(t)t.textContent=BRAND.name+' — '+BRAND.tagline;
+  // Splash
+  var sn=document.getElementById('splash-name');if(sn)sn.textContent=BRAND.name;
+  var st=document.getElementById('splash-tagline');if(st)st.textContent=BRAND.tagline;
+  var sl=document.getElementById('splash-logo');if(sl)sl.textContent=BRAND.logoText||BRAND.name[0];
+  var ab=document.getElementById('about-brand');if(ab)ab.textContent='About '+BRAND.name;
+  // Theme color meta
+  var mc=document.querySelector('meta[name="theme-color"]');if(mc)mc.content=BRAND.theme.primary||BRAND.pwa.themeColor;
+  // Manifest link
+  var ml=document.querySelector('link[rel="manifest"]');if(ml)ml.href='/manifest.json?b='+encodeURIComponent(BRAND.name);
+  // Splash logo
+  var sl2=document.getElementById('splash-logo-e');if(sl2)sl2.style.background=BRAND.theme.gradient;
+  // Welcome logo
+  var wl=document.getElementById('welcome-logo');if(wl)wl.textContent=BRAND.logoText||BRAND.name[0];
+  var wl2=document.getElementById('welcome-logo-c');if(wl2)wl2.style.background=BRAND.theme.gradient;
+  // Theme
+  document.documentElement.setAttribute('data-theme',localStorage.getItem(BRAND.storage.prefix+'-theme')||'light');
+}
 
 // ===================== APP STATE =====================
 var _debug = true;

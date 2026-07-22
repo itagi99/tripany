@@ -205,23 +205,58 @@ async function main() {
   fs.writeFileSync(path.join(ROOT, 'vehigo-php', 'mobile', 'favicon.svg'), favicon);
   console.log('  ' + green('✓') + ' vehigo-php/mobile/favicon.svg');
 
-  // ── Update mobile index.html BRAND object ──
+  // ── Update mobile index.html BRAND defaults ──
   console.log('');
   console.log(yellow('  ── Generating Branded Files ──'));
   console.log('  ' + cyan('→') + ' Update vehigo-php/mobile/index.html with brand config...');
 
-  // Read mobile HTML and inject BRAND
   let mobileHtml = fs.readFileSync(path.join(ROOT, 'vehigo-php', 'mobile', 'index.html'), 'utf8');
-  // The BRAND object is already placeholdered; just verify it exists
-  if (mobileHtml.includes('var BRAND = {')) {
-    console.log('  ' + green('✓') + ' Mobile app BRAND config injected (already in template)');
-  }
+  // Replace BRAND defaults
+  mobileHtml = mobileHtml.replace(/\bname: '.*?'(?=,)/, "name: '" + brand.name + "'");
+  mobileHtml = mobileHtml.replace(/\bshortName: '.*?'(?=,)/, "shortName: '" + brand.shortName + "'");
+  mobileHtml = mobileHtml.replace(/\btagline: '.*?'(?=,)/, "tagline: '" + brand.tagline + "'");
+  mobileHtml = mobileHtml.replace(/\blogoText: '.*?'(?=,)/, "logoText: '" + brand.logoText + "'");
+  // Theme
+  mobileHtml = mobileHtml.replace(/\bprimary: '.*?'(?=,)/, "primary: '" + theme.primaryColor + "'");
+  mobileHtml = mobileHtml.replace(/\bprimaryLight: '.*?'(?=,)/, "primaryLight: '" + theme.primaryLight + "'");
+  mobileHtml = mobileHtml.replace(/\bprimaryDark: '.*?'(?=,)/, "primaryDark: '" + theme.primaryDark + "'");
+  mobileHtml = mobileHtml.replace(/primaryRgb: '.*?'/, "primaryRgb: '" + (parseInt(theme.primaryColor.slice(1),16)>>16&255)+','+(parseInt(theme.primaryColor.slice(1),16)>>8&255)+','+(parseInt(theme.primaryColor.slice(1),16)&255) + "'");
+  mobileHtml = mobileHtml.replace(/\bsecondary: '.*?'(?=,)/, "secondary: '" + theme.secondaryColor + "'");
+  mobileHtml = mobileHtml.replace(/gradient: '.*?'/, "gradient: '" + theme.gradient + "'");
+  // Contact
+  mobileHtml = mobileHtml.replace(/\bwhatsapp: '.*?'(?=,)/, "whatsapp: '" + contact.whatsapp + "'");
+  mobileHtml = mobileHtml.replace(/\bsupportEmail: '.*?'(?=,)/, "supportEmail: '" + contact.supportEmail + "'");
+  mobileHtml = mobileHtml.replace(/\bphone: '.*?'(?=,)/, "phone: '" + contact.phone + "'");
+  // Defaults
+  mobileHtml = mobileHtml.replace(/\blocation: '.*?'(?=,)/, "location: '" + defaults.location + "'");
+  mobileHtml = mobileHtml.replace(/\bpincode: '.*?'(?=,)/, "pincode: '" + defaults.pincode + "'");
+  // Splash fallback text
+  mobileHtml = mobileHtml.replace(/(id="splash-name"[^>]*>)[^<]+(<\/h1>)/, '$1' + brand.name + '$2');
+  mobileHtml = mobileHtml.replace(/(id="splash-tagline"[^>]*>)[^<]+(<\/p>)/, '$1' + brand.tagline + '$2');
+  mobileHtml = mobileHtml.replace(/(id="splash-logo"[^>]*>)[^<]+(<\/span>)/, '$1' + brand.logoText + '$2');
+  mobileHtml = mobileHtml.replace(/(class="splash-logo-pulse"[^>]*>)[^<]+(<\/span>)/, '$1' + brand.logoText + '$2');
+  // Title
+  mobileHtml = mobileHtml.replace(/(id="page-title">)[^<]+(<\/title>)/, '$1' + brand.name + ' — ' + brand.tagline + '$2');
+  // About
+  mobileHtml = mobileHtml.replace(/(id="about-brand"[^>]*>)[^<]+(<\/span>)/, '$1About ' + brand.name + '$2');
+  // Login logo
+  mobileHtml = mobileHtml.replace(/(id="welcome-logo"[^>]*>)[^<]+(<\/span>)/, '$1' + brand.logoText + '$2');
+  // Storage prefix
+  mobileHtml = mobileHtml.replace(/\bprefix: '.*?'/, "prefix: '" + storagePrefix + "'");
 
-  // ── Update admin index.html BRAND object ──
+  fs.writeFileSync(path.join(ROOT, 'vehigo-php', 'mobile', 'index.html'), mobileHtml);
+  console.log('  ' + green('✓') + ' Mobile app BRAND defaults updated in HTML');
+
+  // ── Update admin index.html BRAND defaults ──
   console.log('  ' + cyan('→') + ' Update admin/index.html with brand config...');
   let adminHtml = fs.readFileSync(path.join(ROOT, 'admin', 'index.html'), 'utf8');
   if (adminHtml.includes('var BRAND = {')) {
-    console.log('  ' + green('✓') + ' Admin SPA BRAND config injected (already in template)');
+    adminHtml = adminHtml.replace(/\bname: '.*?'(?=,)/, "name: '" + brand.name + "'");
+    adminHtml = adminHtml.replace(/\btitle: '.*?'(?=,)/, "title: '" + admin.title + "'");
+    adminHtml = adminHtml.replace(/\blogoText: '.*?'(?=,)/, "logoText: '" + brand.logoText + "'");
+    adminHtml = adminHtml.replace(/\bprimary: '.*?'(?=,)/, "primary: '" + theme.primaryColor + "'");
+    fs.writeFileSync(path.join(ROOT, 'admin', 'index.html'), adminHtml);
+    console.log('  ' + green('✓') + ' Admin SPA BRAND defaults updated');
   }
 
   // ── Generate PHP brand config ──

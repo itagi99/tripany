@@ -3,6 +3,7 @@
   "routes": [
     { "src": "/api/index.php", "dest": "/api/server" },
     { "src": "/api/(.*)", "dest": "/api/server" },
+    { "src": "/brand.config.json", "dest": "/brand.config.json" },
     { "src": "/uploads/(.*)", "dest": "/vehigo-php/uploads/$1" },
     { "src": "/assets/(.*)", "dest": "/vehigo-php/mobile/assets/$1" },
     { "src": "/manifest.json", "dest": "/vehigo-php/mobile/manifest.json" },
